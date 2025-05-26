@@ -1,26 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>학생 일정 관리</title>
 <style>
-  ...
-  input[type="date"] {
-    width: 110px; /* 최소한으로 */
+  body {
+    font-family: sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4;
   }
-
+  .student-section {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 30px;
+    background: white;
+  }
+  h2 {
+    margin-bottom: 15px;
+  }
+  .category {
+    margin-top: 20px;
+  }
+  .category h3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  .task {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 4px;
+    background: #fafafa;
+  }
+  input, select, button {
+    padding: 5px;
+    font-size: 1em;
+  }
+  input[type="date"] {
+    width: 110px;
+  }
   input[type="text"].small-input {
-    width: 90px; /* 좁은 폭 */
+    width: 90px;
     font-size: 0.9em;
     flex-shrink: 1;
   }
-
   .task label {
     display: flex;
     align-items: center;
     gap: 5px;
     flex-wrap: nowrap;
   }
-
   .task input[type="text"] {
     min-width: 0;
   }
-
   @media (max-width: 600px) {
     .task {
       flex-wrap: wrap;
@@ -30,3 +69,135 @@
     }
   }
 </style>
+</head>
+<body>
+
+<div id="students">
+<script>
+  const students = ['JH'];
+  const categoryFields = {
+    '숙제': [
+      { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
+      { label: '범위', type: 'text', placeholder: '예: 1~3쪽' },
+      { label: '마감일', type: 'date' }
+    ],
+    '공부': [
+      { label: '과목', type: 'text', placeholder: '예: 사회', className: 'small-input' },
+      { label: '범위', type: 'text', placeholder: '예: 3~5단원' },
+      { label: '마감일', type: 'date' }
+    ],
+    '시험': [
+      { label: '과목', type: 'text', placeholder: '예: 역사', className: 'small-input' },
+      { label: '범위', type: 'text', placeholder: '예: 1~4단원' },
+      { label: '마감일', type: 'date' }
+    ],
+    '수행평가': [
+      { label: '내용', type: 'text', placeholder: '예: 발표 준비' },
+      { label: '마감일', type: 'date' }
+    ]
+  };
+
+  students.forEach(student => {
+    document.write(`<div class="student-section" id="student-${student}">
+      <h2>${student}</h2>
+      <div id="categories-${student}">`);
+
+    for (const cat in categoryFields) {
+      document.write(`
+        <div class="category" id="${cat}-${student}">
+          <h3>${cat}
+            <button onclick="addTask('${student}', '${cat}')">+ 추가</button>
+          </h3>
+          <div class="task-list"></div>
+        </div>
+      `);
+    }
+
+    document.write(`
+      <div class="category" id="completed-${student}">
+        <h3>완료된 항목</h3>
+        <div class="task-list"></div>
+      </div>
+      <div class="category" id="deleted-${student}">
+        <h3>삭제된 항목</h3>
+        <div class="task-list"></div>
+      </div>
+    `);
+
+    document.write(`</div></div>`);
+  });
+
+  function addTask(student, category) {
+    const taskDiv = document.createElement('div');
+    taskDiv.className = 'task';
+    taskDiv.dataset.student = student;
+    taskDiv.dataset.category = category;
+
+    const inputs = [];
+
+    categoryFields[category].forEach(field => {
+      const label = document.createElement('label');
+      label.textContent = field.label + ': ';
+
+      let input;
+      if (field.type === 'select') {
+        input = document.createElement('select');
+        field.options.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          input.appendChild(option);
+        });
+      } else {
+        input = document.createElement('input');
+        input.type = field.type;
+        if (field.placeholder) input.placeholder = field.placeholder;
+        if (field.className) input.className = field.className;
+      }
+
+      label.appendChild(input);
+      taskDiv.appendChild(label);
+      inputs.push(input);
+    });
+
+    const btnSave = document.createElement('button');
+    btnSave.textContent = '입력';
+
+    const btnCancelInput = document.createElement('button');
+    btnCancelInput.textContent = '취소';
+
+    const btnComplete = document.createElement('button');
+    btnComplete.textContent = '완료';
+    btnComplete.style.display = 'none';
+
+    const btnDelete = document.createElement('button');
+    btnDelete.textContent = '삭제';
+    btnDelete.style.display = 'none';
+
+    const btnRestore = document.createElement('button');
+    btnRestore.textContent = '복구';
+    btnRestore.style.display = 'none';
+
+    btnSave.onclick = () => {
+      for (const input of inputs) {
+        if (!input.value) {
+          alert('모든 항목을 입력해주세요.');
+          return;
+        }
+      }
+      inputs.forEach(input => input.disabled = true);
+      btnSave.style.display = 'none';
+      btnCancelInput.style.display = 'none';
+
+      btnComplete.style.display = 'inline';
+      btnDelete.style.display = 'inline';
+    };
+
+    btnCancelInput.onclick = () => {
+      if (confirm('이 항목을 입력하지 않고 취소하시겠습니까?')) {
+        taskDiv.remove();
+      }
+    };
+
+    btnComplete.onclick = () => {
+      if (confirm('이 항목을 완료 처리하시겠
