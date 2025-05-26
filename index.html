@@ -126,7 +126,30 @@
   </div>
 </div>
 
-<script>
+<!-- Firebase JS SDK -->
+<script type="module">
+  // Import Firebase modules (app, analytics, database)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
+  import { getDatabase, ref, set, remove, update, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+  // Firebase config (본인 config로 교체하세요)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBuhnhDDgnZkNMfFo3_0EsGrJzezKbTpZs",
+    authDomain: "study-fbdae.firebaseapp.com",
+    projectId: "study-fbdae",
+    storageBucket: "study-fbdae.firebasestorage.app",
+    messagingSenderId: "427130427133",
+    appId: "1:427130427133:web:6e836cbbcd134fcde7d094",
+    measurementId: "G-M26YMNRFRV"
+  };
+
+  // Firebase 초기화
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getDatabase(app);
+
+  // 카테고리별 필드 정의
   const categoryFields = {
     '숙제': [
       { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
@@ -146,10 +169,154 @@
     '수행평가': [
       { label: '내용', type: 'text', placeholder: '예: 발표 준비' },
       { label: '마감일', type: 'date' }
-    ]
+    ],
+    'completed': [], // 완료된 항목은 읽기 전용
+    'deleted': []    // 삭제된 항목도 읽기 전용
   };
 
+  // DB 저장 함수
+  function saveTaskToDB(student, category, taskId, taskData) {
+    set(ref(db, `tasks/${student}/${category}/${taskId}`), taskData);
+  }
+
+  // DB 삭제 함수
+  function deleteTaskFromDB(student, category, taskId) {
+    remove(ref(db, `tasks/${student}/${category}/${taskId}`));
+  }
+
+  // DB 업데이트 함수
+  function updateTaskInDB(student, category, taskId, updates) {
+    update(ref(db, `tasks/${student}/${category}/${taskId}`), updates);
+  }
+
+  // DB에서 불러와 화면에 렌더링
+  function loadTasksFromDB(student, category) {
+    const categoryRef = ref(db, `tasks/${student}/${category}`);
+    onValue(categoryRef, (snapshot) => {
+      const taskListDiv = document.querySelector(`#${category}-${student} .task-list`);
+      if (!taskListDiv) return;
+      taskListDiv.innerHTML = '';
+
+      const data = snapshot.val();
+      if (data) {
+        for (const [taskId, taskData] of Object.entries(data)) {
+          renderTaskFromData(student, category, taskId, taskData);
+        }
+      }
+    });
+  }
+
+  // DB 데이터로 task 생성
+  function renderTaskFromData(student, category, taskId, taskData) {
+    const taskDiv = document.createElement('div');
+    taskDiv.className = 'task';
+    taskDiv.dataset.student = student;
+    taskDiv.dataset.category = category;
+    taskDiv.dataset.taskId = taskId;
+
+    // 입력폼이 아닌 읽기 전용으로 보여주기
+    for (const field of categoryFields[category] || []) {
+      const label = document.createElement('label');
+      let value = taskData[field.label] || '';
+
+      if (field.type === 'select') {
+        label.textContent = field.label + ': ';
+        const select = document.createElement('select');
+        field.options.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          if (opt === value) option.selected = true;
+          select.appendChild(option);
+        });
+        select.disabled = true;
+        label.appendChild(select);
+      } else if (field.type === 'date') {
+        const dateLabelText = document.createElement('span');
+        dateLabelText.className = 'date-label';
+        if (value) {
+          const date = new Date(value);
+          const yy = String(date.getFullYear()).slice(2);
+          const mm = String(date.getMonth() + 1).padStart(2, '0');
+          const dd = String(date.getDate()).padStart(2, '0');
+          dateLabelText.textContent = `${yy}-${mm}-${dd}`;
+        } else {
+          dateLabelText.textContent = field.label;
+        }
+        label.appendChild(dateLabelText);
+      } else {
+        label.textContent = field.label + ': ';
+        const input = document.createElement('input');
+        input.type = field.type;
+        if (field.placeholder) input.placeholder = field.placeholder;
+        if (field.className) input.className = field.className;
+        input.value = value;
+        input.disabled = true;
+        label.appendChild(input);
+      }
+      taskDiv.appendChild(label);
+    }
+
+    // 완료, 삭제, 복구 버튼
+    const btnComplete = document.createElement('button');
+    btnComplete.textContent = '완료';
+
+    const btnDelete = document.createElement('button');
+    btnDelete.textContent = '삭제';
+
+    const btnRestore = document.createElement('button');
+    btnRestore.textContent = '복구';
+
+    if (category === 'completed') {
+      btnComplete.style.display = 'none';
+      btnDelete.style.display = 'inline';
+      btnRestore.style.display = 'none';
+    } else if (category === 'deleted') {
+      btnComplete.style.display = 'none';
+      btnDelete.style.display = 'none';
+      btnRestore.style.display = 'inline';
+    } else {
+      btnComplete.style.display = 'inline';
+      btnDelete.style.display = 'inline';
+      btnRestore.style.display = 'none';
+    }
+
+    btnComplete.onclick = () => {
+      if (confirm('이 항목을 완료 처리하시겠습니까?')) {
+        deleteTaskFromDB(student, category, taskId);
+        saveTaskToDB(student, 'completed', taskId, taskData);
+      }
+    };
+
+    btnDelete.onclick = () => {
+      if (confirm('이 항목을 삭제하시겠습니까?')) {
+        deleteTaskFromDB(student, category, taskId);
+        saveTaskToDB(student, 'deleted', taskId, taskData);
+      }
+    };
+
+    btnRestore.onclick = () => {
+      if (confirm('이 항목을 복구하시겠습니까?')) {
+        deleteTaskFromDB(student, category, taskId);
+        // 복구 시 기본 카테고리 '숙제'로 복구 (필요 시 수정하세요)
+        saveTaskToDB(student, '숙제', taskId, taskData);
+      }
+    };
+
+    taskDiv.appendChild(btnComplete);
+    taskDiv.appendChild(btnDelete);
+    taskDiv.appendChild(btnRestore);
+
+    document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
+  }
+
+  // 기존 addTask 함수 (입력폼 추가 + 저장까지)
   function addTask(student, category) {
+    if (!categoryFields[category]) {
+      alert('알 수 없는 카테고리입니다.');
+      return;
+    }
+
     const taskDiv = document.createElement('div');
     taskDiv.className = 'task';
     taskDiv.dataset.student = student;
@@ -170,138 +337,80 @@
           select.appendChild(option);
         });
         label.appendChild(select);
-        inputs.push(select);
-
+        inputs.push({label: field.label, element: select});
       } else if (field.type === 'date') {
-        // 마감일 텍스트 스타일 변경, 말풍선 형태
-        const dateLabelText = document.createElement('span');
-        dateLabelText.textContent = field.label;
-        dateLabelText.className = 'date-label';
-
-        // 임시 input[type=date], 화면에는 추가하지 않고 body에 숨김으로 추가
-        const tempInput = document.createElement('input');
-        tempInput.type = 'date';
-        tempInput.style.position = 'absolute';
-        tempInput.style.left = '-9999px';
-        document.body.appendChild(tempInput);
-
-        tempInput.addEventListener('change', () => {
-          if (tempInput.value) {
-            const date = new Date(tempInput.value);
-            const yy = String(date.getFullYear()).slice(2);
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            dateLabelText.textContent = `${yy}-${mm}-${dd}`;
-          } else {
-            dateLabelText.textContent = field.label;
-          }
-        });
-
-        dateLabelText.addEventListener('click', () => {
-          tempInput.value = '';
-          tempInput.click();
-        });
-
-        label.appendChild(dateLabelText);
-        inputs.push(tempInput);
-
+        label.textContent = field.label + ': ';
+        const input = document.createElement('input');
+        input.type = 'date';
+        label.appendChild(input);
+        inputs.push({label: field.label, element: input});
       } else {
         label.textContent = field.label + ': ';
         const input = document.createElement('input');
-        input.type = field.type;
+        input.type = 'text';
         if (field.placeholder) input.placeholder = field.placeholder;
         if (field.className) input.className = field.className;
         label.appendChild(input);
-        inputs.push(input);
+        inputs.push({label: field.label, element: input});
       }
 
       taskDiv.appendChild(label);
     });
 
-    // 버튼 생성
+    // 버튼: 저장, 취소
     const btnSave = document.createElement('button');
-    btnSave.textContent = '입력';
+    btnSave.textContent = '저장';
 
-    const btnCancelInput = document.createElement('button');
-    btnCancelInput.textContent = '취소';
-
-    const btnComplete = document.createElement('button');
-    btnComplete.textContent = '완료';
-    btnComplete.style.display = 'none';
-
-    const btnDelete = document.createElement('button');
-    btnDelete.textContent = '삭제';
-    btnDelete.style.display = 'none';
-
-    const btnRestore = document.createElement('button');
-    btnRestore.textContent = '복구';
-    btnRestore.style.display = 'none';
+    const btnCancel = document.createElement('button');
+    btnCancel.textContent = '취소';
 
     btnSave.onclick = () => {
+      // 입력값 검사
       for (const input of inputs) {
-        if (!input.value) {
-          alert('모든 항목을 입력해주세요.');
+        if (!input.element.value.trim()) {
+          alert(`${input.label}를(을) 입력해주세요.`);
           return;
         }
       }
-      inputs.forEach(input => input.disabled = true);
-      btnSave.style.display = 'none';
-      btnCancelInput.style.display = 'none';
-      btnComplete.style.display = 'inline';
-      btnDelete.style.display = 'inline';
+
+      // taskData 만들기
+      const taskData = {};
+      inputs.forEach(input => {
+        taskData[input.label] = input.element.value.trim();
+      });
+
+      // 고유 ID 생성
+      const taskId = Date.now().toString();
+
+      // DB에 저장
+      saveTaskToDB(student, category, taskId, taskData);
+
+      // 입력폼 지우고 로드 다시하기 (onValue 리스너가 자동 갱신)
+      taskDiv.remove();
     };
 
-    btnCancelInput.onclick = () => {
-      if (confirm('이 항목을 입력하지 않고 취소하시겠습니까?')) {
-        taskDiv.remove();
-      }
+    btnCancel.onclick = () => {
+      taskDiv.remove();
     };
-
-    btnComplete.onclick = () => {
-      if (confirm('이 항목을 완료 처리하시겠습니까?')) {
-        moveToArea(taskDiv, 'completed', student);
-        toggleButtons();
-      }
-    };
-
-    btnDelete.onclick = () => {
-      if (confirm('이 항목을 삭제하시겠습니까?')) {
-        moveToArea(taskDiv, 'deleted', student);
-        toggleButtons();
-      }
-    };
-
-    btnRestore.onclick = () => {
-      if (confirm('이 항목을 복구하시겠습니까?')) {
-        moveToArea(taskDiv, category, student);
-        btnRestore.style.display = 'none';
-        btnComplete.style.display = 'inline';
-        btnDelete.style.display = 'inline';
-      }
-    };
-
-    function moveToArea(taskDiv, area, student) {
-      const targetSelector = `#${area}-${student} .task-list`;
-      document.querySelector(targetSelector).appendChild(taskDiv);
-    }
-
-    function toggleButtons() {
-      btnComplete.style.display = 'none';
-      btnDelete.style.display = 'none';
-      btnSave.style.display = 'none';
-      btnCancelInput.style.display = 'none';
-      btnRestore.style.display = 'inline';
-      inputs.forEach(input => input.disabled = true);
-    }
 
     taskDiv.appendChild(btnSave);
-    taskDiv.appendChild(btnCancelInput);
-    taskDiv.appendChild(btnComplete);
-    taskDiv.appendChild(btnDelete);
-    taskDiv.appendChild(btnRestore);
+    taskDiv.appendChild(btnCancel);
 
-    document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
+    const taskList = document.querySelector(`#${category}-${student} .task-list`);
+    taskList.appendChild(taskDiv);
   }
+
+  // 페이지 로드 시 모든 학생, 카테고리 DB에서 불러오기
+  const students = ['JH']; // 학생 이름 추가 가능
+  const categories = ['숙제', '공부', '시험', '수행평가', 'completed', 'deleted'];
+
+  window.onload = () => {
+    students.forEach(student => {
+      categories.forEach(category => {
+        loadTasksFromDB(student, category);
+      });
+    });
+  };
 </script>
 
 </body>
