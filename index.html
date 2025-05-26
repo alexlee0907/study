@@ -155,6 +155,20 @@
         input.type = field.type;
         if (field.placeholder) input.placeholder = field.placeholder;
         if (field.className) input.className = field.className;
+
+        // 날짜 형식 변경 이벤트 추가
+        if (field.type === 'date') {
+          input.addEventListener('change', () => {
+            const date = new Date(input.value);
+            if (!isNaN(date)) {
+              input.dataset.originalValue = input.value; // 원본 저장
+              const yy = String(date.getFullYear()).slice(2);
+              const mm = String(date.getMonth() + 1).padStart(2, '0');
+              const dd = String(date.getDate()).padStart(2, '0');
+              input.value = `${yy}-${mm}-${dd}`;
+            }
+          });
+        }
       }
 
       label.appendChild(input);
@@ -187,7 +201,14 @@
           return;
         }
       }
-      inputs.forEach(input => input.disabled = true);
+      inputs.forEach(input => {
+        input.disabled = true;
+
+        if (input.type === 'date' && input.dataset.originalValue) {
+          input.dataset.displayValue = input.value; // yy-mm-dd
+          input.value = input.dataset.originalValue; // yyyy-mm-dd 저장
+        }
+      });
       btnSave.style.display = 'none';
       btnCancelInput.style.display = 'none';
       btnComplete.style.display = 'inline';
