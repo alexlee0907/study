@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>학생 일정 관리</title>
   <style>
     body {
@@ -36,6 +36,10 @@
       gap: 10px;
       margin-bottom: 10px;
       align-items: center;
+      border: 1px solid #ddd;
+      padding: 8px;
+      border-radius: 4px;
+      background: #fafafa;
     }
     input, select, button {
       padding: 5px;
@@ -51,7 +55,6 @@
 <body>
 
   <div id="students">
-    <!-- JS로 학생 섹션 생성 -->
     <script>
       const students = ['JH', 'HJ'];
       const categoryFields = {
@@ -94,6 +97,18 @@
           `);
         }
 
+        // 완료, 취소 영역 추가
+        document.write(`
+          <div class="category" id="completed-${student}">
+            <h3>완료된 항목</h3>
+            <div class="task-list"></div>
+          </div>
+          <div class="category" id="cancelled-${student}">
+            <h3>취소된 항목</h3>
+            <div class="task-list"></div>
+          </div>
+        `);
+
         document.write(`<div id="calendar-${student}" class="calendar-view">
           [${student}] 월간 보기 영역입니다.
         </div></div>`);
@@ -111,6 +126,7 @@
 
         categoryFields[category].forEach(field => {
           const label = document.createElement('label');
+          label.style.marginRight = '10px';
           label.textContent = field.label + ': ';
 
           let input;
@@ -138,24 +154,47 @@
         btnConfirm.textContent = '입력';
         btnConfirm.onclick = () => {
           inputs.forEach(input => {
-            input.disabled = true;
+            if(input.value === '') {
+              alert('모든 항목을 입력해주세요.');
+              return;
+            }
           });
+          inputs.forEach(input => input.disabled = true);
           btnConfirm.style.display = 'none';
-          btnCancel.style.display = 'none';
+          btnCancel.style.display = 'inline';
           btnComplete.style.display = 'inline';
         };
 
         const btnCancel = document.createElement('button');
         btnCancel.textContent = '취소';
+        btnCancel.style.display = 'none';
         btnCancel.onclick = () => {
-          taskDiv.remove();
+          // 취소된 항목 영역으로 이동
+          inputs.forEach(input => input.disabled = true);
+          btnConfirm.style.display = 'none';
+          btnCancel.style.display = 'none';
+          btnComplete.style.display = 'none';
+
+          // 버튼들 제거
+          taskDiv.querySelectorAll('button').forEach(b => b.remove());
+
+          document.querySelector(`#cancelled-${student} .task-list`).appendChild(taskDiv);
         };
 
         const btnComplete = document.createElement('button');
         btnComplete.textContent = '완료';
         btnComplete.style.display = 'none';
         btnComplete.onclick = () => {
-          taskDiv.remove();
+          // 완료된 항목 영역으로 이동
+          inputs.forEach(input => input.disabled = true);
+          btnConfirm.style.display = 'none';
+          btnCancel.style.display = 'none';
+          btnComplete.style.display = 'none';
+
+          // 버튼들 제거
+          taskDiv.querySelectorAll('button').forEach(b => b.remove());
+
+          document.querySelector(`#completed-${student} .task-list`).appendChild(taskDiv);
         };
 
         taskDiv.appendChild(btnConfirm);
