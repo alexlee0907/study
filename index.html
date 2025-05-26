@@ -59,11 +59,27 @@
     .task input[type="text"] {
       min-width: 0;
     }
-    .date-display {
-      min-width: 70px;
-      font-weight: bold;
-      cursor: default;
+    /* 마감일 스타일 */
+    .date-label {
+      display: inline-block;
+      padding: 3px 8px;
+      background-color: #d0eaff;
+      border: 1.5px solid #3399ff;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9em;
+      color: #005bbb;
+      user-select: none;
+      cursor: pointer;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      min-width: 75px;
+      text-align: center;
     }
+    .date-label:hover {
+      background-color: #3399ff;
+      color: white;
+    }
+
     @media (max-width: 600px) {
       .task {
         flex-wrap: wrap;
@@ -157,11 +173,10 @@
         inputs.push(select);
 
       } else if (field.type === 'date') {
-        // 마감일 텍스트만 만들고 달력은 임시 input으로 처리
-
+        // 마감일 텍스트 스타일 변경, 말풍선 형태
         const dateLabelText = document.createElement('span');
         dateLabelText.textContent = field.label;
-        dateLabelText.style.cursor = 'pointer';
+        dateLabelText.className = 'date-label';
 
         // 임시 input[type=date], 화면에는 추가하지 않고 body에 숨김으로 추가
         const tempInput = document.createElement('input');
