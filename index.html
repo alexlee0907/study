@@ -43,6 +43,9 @@
     padding: 5px;
     font-size: 1em;
   }
+  label {
+    margin-right: 10px;
+  }
 </style>
 </head>
 <body>
@@ -50,9 +53,11 @@
 <div id="students">
 <script>
   const students = ['JH', 'HJ'];
+  // 숙제에 숙제범위 추가
   const categoryFields = {
     '숙제': [
       { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
+      { label: '숙제범위', type: 'text', placeholder: '예: 1~3쪽' },
       { label: '마감일', type: 'date' }
     ],
     '공부': [
@@ -105,12 +110,13 @@
   function addTask(student, category) {
     const taskDiv = document.createElement('div');
     taskDiv.className = 'task';
+    taskDiv.dataset.student = student;
+    taskDiv.dataset.category = category;
 
     const inputs = [];
 
     categoryFields[category].forEach(field => {
       const label = document.createElement('label');
-      label.style.marginRight = '10px';
       label.textContent = field.label + ': ';
 
       let input;
@@ -148,6 +154,10 @@
     btnDelete.textContent = '삭제';
     btnDelete.style.display = 'none';
 
+    const btnRestore = document.createElement('button');
+    btnRestore.textContent = '복구';
+    btnRestore.style.display = 'none';
+
     // 입력 완료 버튼 클릭
     btnSave.onclick = () => {
       for (const input of inputs) {
@@ -174,33 +184,61 @@
     // 완료 버튼 클릭
     btnComplete.onclick = () => {
       if (confirm('이 항목을 완료 처리하시겠습니까?')) {
-        btnComplete.style.display = 'none';
-        btnDelete.style.display = 'none';
+        // 완료 영역으로 이동
+        moveToArea(taskDiv, 'completed', student);
 
-        // 버튼 모두 제거
-        [btnSave, btnCancelInput, btnComplete, btnDelete].forEach(b => b.remove());
-
-        document.querySelector(`#completed-${student} .task-list`).appendChild(taskDiv);
+        toggleButtonsAfterCompleteDelete(taskDiv, 'complete');
       }
     };
 
     // 삭제 버튼 클릭
     btnDelete.onclick = () => {
       if (confirm('이 항목을 삭제하시겠습니까?')) {
-        btnComplete.style.display = 'none';
-        btnDelete.style.display = 'none';
+        // 삭제 영역으로 이동
+        moveToArea(taskDiv, 'deleted', student);
 
-        // 버튼 모두 제거
-        [btnSave, btnCancelInput, btnComplete, btnDelete].forEach(b => b.remove());
-
-        document.querySelector(`#deleted-${student} .task-list`).appendChild(taskDiv);
+        toggleButtonsAfterCompleteDelete(taskDiv, 'delete');
       }
     };
+
+    // 복구 버튼 클릭 (완료/삭제 항목에서 복구)
+    btnRestore.onclick = () => {
+      if (confirm('이 항목을 복구하시겠습니까?')) {
+        // 원래 카테고리 영역으로 이동
+        moveToArea(taskDiv, taskDiv.dataset.category, student);
+
+        // 입력 완료 상태 버튼으로 전환
+        btnRestore.style.display = 'none';
+        btnComplete.style.display = 'inline';
+        btnDelete.style.display = 'inline';
+      }
+    };
+
+    function moveToArea(taskDiv, area, student) {
+      const targetSelector = (area === 'completed' || area === 'deleted')
+        ? `#${area}-${student} .task-list`
+        : `#${area}-${student} .task-list`;
+
+      document.querySelector(targetSelector).appendChild(taskDiv);
+    }
+
+    function toggleButtonsAfterCompleteDelete(taskDiv, type) {
+      btnComplete.style.display = 'none';
+      btnDelete.style.display = 'none';
+      btnSave.style.display = 'none';
+      btnCancelInput.style.display = 'none';
+
+      btnRestore.style.display = 'inline';
+
+      // 복구 시에는 입력폼 비활성화 유지
+      inputs.forEach(input => input.disabled = true);
+    }
 
     taskDiv.appendChild(btnSave);
     taskDiv.appendChild(btnCancelInput);
     taskDiv.appendChild(btnComplete);
     taskDiv.appendChild(btnDelete);
+    taskDiv.appendChild(btnRestore);
 
     document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
   }
