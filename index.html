@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학생 일정 관리</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+    }
+    .student-section {
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin-bottom: 30px;
+      background: white;
+    }
+    h2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .category {
+      margin-top: 20px;
+    }
+    .category h3 {
+      margin-bottom: 5px;
+    }
+    .task {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    input, select, button {
+      padding: 5px;
+      font-size: 1em;
+    }
+    .view-toggle {
+      margin-left: 10px;
+    }
+    .complete-checkbox {
+      margin-left: 10px;
+    }
+    .calendar-view {
+      margin-top: 10px;
+      background: #e9ecef;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="students">
+    <!-- 각 학생 -->
+    <div class="student-section" id="student-JH">
+      <h2>
+        JH
+        <span>
+          <button onclick="sendToTelegram('JH')">전송 건</button>
+          <select onchange="toggleView(this.value, 'JH')" class="view-toggle">
+            <option value="month">월간 보기</option>
+            <option value="week">주간 보기</option>
+          </select>
+        </span>
+      </h2>
+      <div id="categories-JH">
+        <!-- 각 카테고리 -->
+        <!-- 숙제 -->
+        <div class="category">
+          <h3>숙제</h3>
+          <div class="task">
+            <label>과목:
+              <select>
+                <option>영어</option>
+                <option>수학</option>
+                <option>과학</option>
+              </select>
+            </label>
+            <label>마감일: <input type="date"></label>
+            <label><input type="checkbox" class="complete-checkbox"> 완료</label>
+          </div>
+        </div>
+
+        <!-- 공부 -->
+        <div class="category">
+          <h3>공부</h3>
+          <div class="task">
+            <label>과목: <input type="text" placeholder="예: 사회"></label>
+            <label>범위: <input type="text" placeholder="예: 3~5단원"></label>
+            <label>마감일: <input type="date"></label>
+            <label><input type="checkbox" class="complete-checkbox"> 완료</label>
+          </div>
+        </div>
+
+        <!-- 시험 -->
+        <div class="category">
+          <h3>시험</h3>
+          <div class="task">
+            <label>과목: <input type="text" placeholder="예: 역사"></label>
+            <label>범위: <input type="text" placeholder="예: 1~4단원"></label>
+            <label>마감일: <input type="date"></label>
+            <label><input type="checkbox" class="complete-checkbox"> 완료</label>
+          </div>
+        </div>
+
+        <!-- 수행평가 -->
+        <div class="category">
+          <h3>수행평가</h3>
+          <div class="task">
+            <label>내용: <input type="text" placeholder="예: 발표 준비"></label>
+            <label>마감일: <input type="date"></label>
+            <label><input type="checkbox" class="complete-checkbox"> 완료</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 달력 보기 영역 -->
+      <div id="calendar-JH" class="calendar-view">
+        [JH] 월간 또는 주간 달력 보기 영역입니다 (추후 달력 연동 가능).
+      </div>
+    </div>
+
+    <!-- HJ도 동일하게 복사 가능 -->
+    <div class="student-section" id="student-HJ">
+      <h2>
+        HJ
+        <span>
+          <button onclick="sendToTelegram('HJ')">전송 건</button>
+          <select onchange="toggleView(this.value, 'HJ')" class="view-toggle">
+            <option value="month">월간 보기</option>
+            <option value="week">주간 보기</option>
+          </select>
+        </span>
+      </h2>
+      <!-- 이하 생략, JH와 동일 구조 -->
+      <!-- 동일하게 복사해서 사용 가능 -->
+    </div>
+  </div>
+
+  <script>
+    function sendToTelegram(student) {
+      alert(student + "의 데이터를 텔레그램으로 전송합니다 (여기에 봇 API 연결 가능)");
+      // 실제 전송은 fetch 또는 Telegram Bot API 사용
+    }
+
+    function toggleView(view, student) {
+      const calendar = document.getElementById("calendar-" + student);
+      calendar.innerText = `[${student}] ${view === 'month' ? '월간' : '주간'} 보기로 전환되었습니다.`;
+    }
+  </script>
+
+</body>
+</html>
