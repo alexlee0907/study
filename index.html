@@ -17,9 +17,7 @@
     background: white;
   }
   h2 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    margin-bottom: 15px;
   }
   .category {
     margin-top: 20px;
@@ -44,11 +42,6 @@
   input, select, button {
     padding: 5px;
     font-size: 1em;
-  }
-  .calendar-view {
-    margin-top: 10px;
-    background: #e9ecef;
-    padding: 10px;
   }
 </style>
 </head>
@@ -80,10 +73,7 @@
 
   students.forEach(student => {
     document.write(`<div class="student-section" id="student-${student}">
-      <h2>
-        ${student}
-        <button onclick="sendToTelegram('${student}')">전송 건</button>
-      </h2>
+      <h2>${student}</h2>
       <div id="categories-${student}">`);
 
     for (const cat in categoryFields) {
@@ -109,14 +99,8 @@
       </div>
     `);
 
-    document.write(`<div id="calendar-${student}" class="calendar-view">
-      [${student}] 월간 보기 영역입니다.
-    </div></div>`);
+    document.write(`</div></div>`);
   });
-
-  function sendToTelegram(student) {
-    alert(`${student}의 데이터를 텔레그램으로 전송합니다 (API 연동 필요)`);
-  }
 
   function addTask(student, category) {
     const taskDiv = document.createElement('div');
@@ -150,11 +134,11 @@
     });
 
     // 버튼 생성
-    const btnInput = document.createElement('button');
-    btnInput.textContent = '입력';
+    const btnSave = document.createElement('button');
+    btnSave.textContent = '입력 완료';
 
-    const btnCancel = document.createElement('button');
-    btnCancel.textContent = '취소';
+    const btnCancelInput = document.createElement('button');
+    btnCancelInput.textContent = '취소';
 
     const btnComplete = document.createElement('button');
     btnComplete.textContent = '완료';
@@ -164,61 +148,57 @@
     btnDelete.textContent = '삭제';
     btnDelete.style.display = 'none';
 
-    // 입력 버튼 클릭
-    btnInput.onclick = () => {
-      // 빈 값 체크
+    // 입력 완료 버튼 클릭
+    btnSave.onclick = () => {
       for (const input of inputs) {
         if (!input.value) {
           alert('모든 항목을 입력해주세요.');
           return;
         }
       }
-      // 입력 완료 상태로 전환
       inputs.forEach(input => input.disabled = true);
-      btnInput.style.display = 'none';
-      btnCancel.style.display = 'none';
+      btnSave.style.display = 'none';
+      btnCancelInput.style.display = 'none';
 
       btnComplete.style.display = 'inline';
       btnDelete.style.display = 'inline';
     };
 
-    // 취소 버튼 클릭 (추가한 태스크 삭제)
-    btnCancel.onclick = () => {
-      taskDiv.remove();
+    // 입력 중 취소 버튼 클릭
+    btnCancelInput.onclick = () => {
+      if (confirm('이 항목을 입력하지 않고 취소하시겠습니까?')) {
+        taskDiv.remove();
+      }
     };
 
     // 완료 버튼 클릭
     btnComplete.onclick = () => {
-      // 완료된 영역으로 이동
-      inputs.forEach(input => input.disabled = true);
-      btnComplete.style.display = 'none';
-      btnDelete.style.display = 'none';
-      btnInput.style.display = 'none';
-      btnCancel.style.display = 'none';
+      if (confirm('이 항목을 완료 처리하시겠습니까?')) {
+        btnComplete.style.display = 'none';
+        btnDelete.style.display = 'none';
 
-      // 버튼 모두 제거 (버튼 영역 비우기)
-      [btnInput, btnCancel, btnComplete, btnDelete].forEach(b => b.remove());
+        // 버튼 모두 제거
+        [btnSave, btnCancelInput, btnComplete, btnDelete].forEach(b => b.remove());
 
-      document.querySelector(`#completed-${student} .task-list`).appendChild(taskDiv);
+        document.querySelector(`#completed-${student} .task-list`).appendChild(taskDiv);
+      }
     };
 
     // 삭제 버튼 클릭
     btnDelete.onclick = () => {
-      // 삭제된 영역으로 이동
-      inputs.forEach(input => input.disabled = true);
-      btnComplete.style.display = 'none';
-      btnDelete.style.display = 'none';
-      btnInput.style.display = 'none';
-      btnCancel.style.display = 'none';
+      if (confirm('이 항목을 삭제하시겠습니까?')) {
+        btnComplete.style.display = 'none';
+        btnDelete.style.display = 'none';
 
-      // 버튼 모두 제거
-      [btnInput, btnCancel, btnComplete, btnDelete].forEach(b => b.remove());
+        // 버튼 모두 제거
+        [btnSave, btnCancelInput, btnComplete, btnDelete].forEach(b => b.remove());
 
-      document.querySelector(`#deleted-${student} .task-list`).appendChild(taskDiv);
+        document.querySelector(`#deleted-${student} .task-list`).appendChild(taskDiv);
+      }
     };
 
-    taskDiv.appendChild(btnInput);
-    taskDiv.appendChild(btnCancel);
+    taskDiv.appendChild(btnSave);
+    taskDiv.appendChild(btnCancelInput);
     taskDiv.appendChild(btnComplete);
     taskDiv.appendChild(btnDelete);
 
