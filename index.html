@@ -196,13 +196,13 @@
     });
 
     const saveBtn = document.createElement('button');
-    saveBtn.textContent = '입력';  // 저장 → 입력으로 변경
+    saveBtn.textContent = '입력';
     saveBtn.onclick = async () => {
       inputs.forEach(({ label, input }) => {
         taskData[label] = input.value;
       });
 
-      if(Object.values(taskData).some(val => !val)){
+      if (Object.values(taskData).some(val => !val)) {
         alert('모든 항목을 입력해주세요.');
         return;
       }
@@ -211,7 +211,7 @@
       try {
         await saveTask(student, category, taskId, taskData);
         taskDiv.remove();
-      } catch(e) {
+      } catch (e) {
         alert('저장 실패');
         console.error(e);
       }
@@ -219,9 +219,7 @@
 
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = '취소';
-    cancelBtn.onclick = () => {
-      taskDiv.remove();
-    };
+    cancelBtn.onclick = () => taskDiv.remove();
 
     taskDiv.appendChild(saveBtn);
     taskDiv.appendChild(cancelBtn);
@@ -234,13 +232,12 @@
     if (!container) return;
 
     container.innerHTML = '';
-
     if (!tasks) return;
 
-    // tasks는 객체 -> 배열로 변환
+    console.log('렌더링 카테고리:', category);  // 디버깅용
+
     const taskEntries = Object.entries(tasks);
 
-    // 정렬: 과목 → 내용(내용 or 범위) → 마감일(날짜)
     taskEntries.sort(([idA, taskA], [idB, taskB]) => {
       const subjectA = (taskA['과목'] || '').toLowerCase();
       const subjectB = (taskB['과목'] || '').toLowerCase();
@@ -265,9 +262,9 @@
       taskDiv.className = 'task';
 
       Object.entries(taskData).forEach(([key, val]) => {
-        if (key === 'originalCategory') return;
-        if (val === '') return;
-        if (key === '마감일' && val) {
+        if (key === 'originalCategory' || val === '') return;
+
+        if (key === '마감일') {
           const dateLabel = document.createElement('span');
           dateLabel.className = 'date-label';
           dateLabel.textContent = val;
@@ -282,7 +279,7 @@
       const btnArea = document.createElement('div');
       btnArea.className = 'btn-area';
 
-      if (category === 'completed' || category === 'deleted') {
+      if (['completed', 'deleted'].includes(category.toLowerCase())) {
         const restoreBtn = document.createElement('button');
         restoreBtn.textContent = '복구';
         restoreBtn.onclick = async () => {
@@ -291,9 +288,8 @@
             return;
           }
           const originalCategory = taskData.originalCategory;
-          const newTaskData = {...taskData};
+          const newTaskData = { ...taskData };
           delete newTaskData.originalCategory;
-
           try {
             await moveTask(student, category, originalCategory, taskId, newTaskData);
           } catch (e) {
@@ -307,7 +303,7 @@
         completeBtn.textContent = '완료';
         completeBtn.onclick = async () => {
           try {
-            await moveTask(student, category, 'completed', taskId, {...taskData, originalCategory: category});
+            await moveTask(student, category, 'completed', taskId, { ...taskData, originalCategory: category });
           } catch (e) {
             alert('완료 처리 실패');
             console.error(e);
@@ -319,7 +315,7 @@
         deleteBtn.textContent = '삭제';
         deleteBtn.onclick = async () => {
           try {
-            await moveTask(student, category, 'deleted', taskId, {...taskData, originalCategory: category});
+            await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
           } catch (e) {
             alert('삭제 처리 실패');
             console.error(e);
@@ -353,7 +349,7 @@
     });
   });
 
-  loadAllTasks('JH'); // 학생 ID 'JH' 기준으로 데이터 불러오기
+  loadAllTasks('JH');
 </script>
 
 </body>
