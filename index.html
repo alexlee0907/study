@@ -35,13 +35,11 @@
       flex-wrap: wrap;
       gap: 10px;
       margin-bottom: 10px;
+      align-items: center;
     }
     input, select, button {
       padding: 5px;
       font-size: 1em;
-    }
-    .view-toggle {
-      margin-left: 10px;
     }
     .calendar-view {
       margin-top: 10px;
@@ -53,120 +51,121 @@
 <body>
 
   <div id="students">
-    <!-- 두 명의 학생 반복 생성 -->
+    <!-- JS로 학생 섹션 생성 -->
     <script>
       const students = ['JH', 'HJ'];
-      const categories = [
-        { name: '숙제', fields: ['과목:select|영어,수학,과학', '마감일:date'] },
-        { name: '공부', fields: ['과목:text|예: 사회', '범위:text|예: 3~5단원', '마감일:date'] },
-        { name: '시험', fields: ['과목:text|예: 역사', '범위:text|예: 1~4단원', '마감일:date'] },
-        { name: '수행평가', fields: ['내용:text|예: 발표 준비', '마감일:date'] }
-      ];
+      const categoryFields = {
+        '숙제': [
+          { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
+          { label: '마감일', type: 'date' }
+        ],
+        '공부': [
+          { label: '과목', type: 'text', placeholder: '예: 사회' },
+          { label: '범위', type: 'text', placeholder: '예: 3~5단원' },
+          { label: '마감일', type: 'date' }
+        ],
+        '시험': [
+          { label: '과목', type: 'text', placeholder: '예: 역사' },
+          { label: '범위', type: 'text', placeholder: '예: 1~4단원' },
+          { label: '마감일', type: 'date' }
+        ],
+        '수행평가': [
+          { label: '내용', type: 'text', placeholder: '예: 발표 준비' },
+          { label: '마감일', type: 'date' }
+        ]
+      };
 
-      function generateStudentSection(student) {
-        let html = `<div class="student-section" id="student-${student}">
+      students.forEach(student => {
+        document.write(`<div class="student-section" id="student-${student}">
           <h2>
             ${student}
-            <span>
-              <button onclick="sendToTelegram('${student}')">전송 건</button>
-              <select onchange="toggleView(this.value, '${student}')" class="view-toggle">
-                <option value="month">월간 보기</option>
-                <option value="week">주간 보기</option>
-              </select>
-            </span>
+            <button onclick="sendToTelegram('${student}')">전송 건</button>
           </h2>
-          <div id="categories-${student}">`;
+          <div id="categories-${student}">`);
 
-        categories.forEach(cat => {
-          html += `<div class="category" id="${cat.name}-${student}">
-            <h3>${cat.name}
-              <button onclick="addTask('${student}', '${cat.name}')">+ 추가</button>
-            </h3>
-            <div class="task-list"></div>
-          </div>`;
-        });
-
-        html += `</div>
-          <div id="calendar-${student}" class="calendar-view">
-            [${student}] 월간 또는 주간 달력 보기 영역입니다.
-          </div>
-        </div>`;
-        document.write(html);
-      }
-
-      students.forEach(generateStudentSection);
-    </script>
-  </div>
-
-  <script>
-    const categoryFields = {
-      '숙제': [
-        { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
-        { label: '마감일', type: 'date' }
-      ],
-      '공부': [
-        { label: '과목', type: 'text', placeholder: '예: 사회' },
-        { label: '범위', type: 'text', placeholder: '예: 3~5단원' },
-        { label: '마감일', type: 'date' }
-      ],
-      '시험': [
-        { label: '과목', type: 'text', placeholder: '예: 역사' },
-        { label: '범위', type: 'text', placeholder: '예: 1~4단원' },
-        { label: '마감일', type: 'date' }
-      ],
-      '수행평가': [
-        { label: '내용', type: 'text', placeholder: '예: 발표 준비' },
-        { label: '마감일', type: 'date' }
-      ]
-    };
-
-    function addTask(student, category) {
-      const taskDiv = document.createElement('div');
-      taskDiv.className = 'task';
-
-      categoryFields[category].forEach(field => {
-        const label = document.createElement('label');
-        label.textContent = field.label + ': ';
-        if (field.type === 'select') {
-          const select = document.createElement('select');
-          field.options.forEach(opt => {
-            const option = document.createElement('option');
-            option.value = opt;
-            option.textContent = opt;
-            select.appendChild(option);
-          });
-          label.appendChild(select);
-        } else {
-          const input = document.createElement('input');
-          input.type = field.type;
-          if (field.placeholder) input.placeholder = field.placeholder;
-          label.appendChild(input);
+        for (const cat in categoryFields) {
+          document.write(`
+            <div class="category" id="${cat}-${student}">
+              <h3>${cat}
+                <button onclick="addTask('${student}', '${cat}')">+ 추가</button>
+              </h3>
+              <div class="task-list"></div>
+            </div>
+          `);
         }
-        taskDiv.appendChild(label);
+
+        document.write(`<div id="calendar-${student}" class="calendar-view">
+          [${student}] 월간 보기 영역입니다.
+        </div></div>`);
       });
 
-      const checkboxLabel = document.createElement('label');
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.onclick = () => {
-        taskDiv.remove(); // 완료되면 항목 삭제
-      };
-      checkboxLabel.appendChild(checkbox);
-      checkboxLabel.append(' 완료');
-      taskDiv.appendChild(checkboxLabel);
+      function sendToTelegram(student) {
+        alert(`${student}의 데이터를 텔레그램으로 전송합니다 (API 연동 필요)`);
+      }
 
-      document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
-    }
+      function addTask(student, category) {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task';
 
-    function sendToTelegram(student) {
-      alert(`${student}의 데이터를 텔레그램으로 전송합니다 (여기에 실제 API 연결 가능)`);
-    }
+        const inputs = [];
 
-    function toggleView(view, student) {
-      const calendar = document.getElementById("calendar-" + student);
-      calendar.innerText = `[${student}] ${view === 'month' ? '월간' : '주간'} 보기로 전환되었습니다.`;
-    }
-  </script>
+        categoryFields[category].forEach(field => {
+          const label = document.createElement('label');
+          label.textContent = field.label + ': ';
+
+          let input;
+          if (field.type === 'select') {
+            input = document.createElement('select');
+            field.options.forEach(opt => {
+              const option = document.createElement('option');
+              option.value = opt;
+              option.textContent = opt;
+              input.appendChild(option);
+            });
+          } else {
+            input = document.createElement('input');
+            input.type = field.type;
+            if (field.placeholder) input.placeholder = field.placeholder;
+          }
+
+          label.appendChild(input);
+          taskDiv.appendChild(label);
+          inputs.push(input);
+        });
+
+        // 버튼들
+        const btnConfirm = document.createElement('button');
+        btnConfirm.textContent = '입력';
+        btnConfirm.onclick = () => {
+          inputs.forEach(input => {
+            input.disabled = true;
+          });
+          btnConfirm.style.display = 'none';
+          btnCancel.style.display = 'none';
+          btnComplete.style.display = 'inline';
+        };
+
+        const btnCancel = document.createElement('button');
+        btnCancel.textContent = '취소';
+        btnCancel.onclick = () => {
+          taskDiv.remove();
+        };
+
+        const btnComplete = document.createElement('button');
+        btnComplete.textContent = '완료';
+        btnComplete.style.display = 'none';
+        btnComplete.onclick = () => {
+          taskDiv.remove();
+        };
+
+        taskDiv.appendChild(btnConfirm);
+        taskDiv.appendChild(btnCancel);
+        taskDiv.appendChild(btnComplete);
+
+        document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
+      }
+    </script>
+  </div>
 
 </body>
 </html>
