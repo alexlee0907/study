@@ -44,7 +44,8 @@
       font-size: 1em;
     }
     input[type="date"] {
-      width: 110px;
+      position: absolute;
+      left: -9999px; /* 화면 밖으로 숨김 */
     }
     input[type="text"].small-input {
       width: 90px;
@@ -56,16 +57,16 @@
       align-items: center;
       gap: 5px;
       flex-wrap: nowrap;
+      cursor: pointer;
+      user-select: none;
     }
     .task input[type="text"] {
       min-width: 0;
     }
     .date-display {
-      font-size: 0.9em;
-      color: #555;
       min-width: 70px;
-      text-align: center;
-      user-select: none;
+      font-weight: bold;
+      cursor: default;
     }
     @media (max-width: 600px) {
       .task {
@@ -146,10 +147,11 @@
 
     categoryFields[category].forEach(field => {
       const label = document.createElement('label');
-      label.textContent = field.label + ': ';
+      // label.textContent = field.label + ': '; // 텍스트는 직접 만듦 아래에서
 
       let input;
       if (field.type === 'select') {
+        label.textContent = field.label + ': ';
         input = document.createElement('select');
         field.options.forEach(opt => {
           const option = document.createElement('option');
@@ -159,35 +161,48 @@
         });
         label.appendChild(input);
       } else if (field.type === 'date') {
-        const wrapper = document.createElement('div');
-        wrapper.style.display = 'flex';
-        wrapper.style.alignItems = 'center';
-        wrapper.style.gap = '8px';
+        // 마감일은 특별 처리: label 클릭 시 달력, 완료 후 텍스트 변경
 
-        const dateInput = document.createElement('input');
-        dateInput.type = 'date';
+        // label에 마감일 텍스트 먼저 넣음
+        const dateLabelText = document.createElement('span');
+        dateLabelText.textContent = field.label;
+        label.appendChild(dateLabelText);
 
-        const dateDisplay = document.createElement('span');
-        dateDisplay.className = 'date-display';
+        // 숨겨진 input[type=date]
+        input = document.createElement('input');
+        input.type = 'date';
 
-        // 날짜 변경 시 yy-mm-dd 형식 표시
-        dateInput.addEventListener('change', () => {
-          const date = new Date(dateInput.value);
-          if (!isNaN(date)) {
+        // label 클릭 시 input[type=date] 클릭 트리거
+        label.style.cursor = 'pointer';
+        label.onclick = (e) => {
+          // label 클릭이 input 클릭으로 이어지지 않게 이벤트 버블링 방지
+          if(e.target !== input) {
+            input.showPicker ? input.showPicker() : input.click();
+          }
+        };
+
+        // input 값 변경시 표시 텍스트 교체
+        input.addEventListener('change', () => {
+          const dateVal = input.value;
+          if (dateVal) {
+            const date = new Date(dateVal);
             const yy = String(date.getFullYear()).slice(2);
             const mm = String(date.getMonth() + 1).padStart(2, '0');
             const dd = String(date.getDate()).padStart(2, '0');
-            dateDisplay.textContent = `${yy}-${mm}-${dd}`;
+            dateLabelText.textContent = `${yy}-${mm}-${dd}`;
+            // 클릭시 다시 달력 나오도록 유지
           } else {
-            dateDisplay.textContent = '';
+            dateLabelText.textContent = field.label;
           }
         });
 
-        wrapper.appendChild(dateInput);
-        wrapper.appendChild(dateDisplay);
-        label.appendChild(wrapper);
-        input = dateInput; // 검증 및 저장 용도
+        // 화면에서 숨김
+        input.style.position = 'absolute';
+        input.style.left = '-9999px';
+
+        label.appendChild(input);
       } else {
+        label.textContent = field.label + ': ';
         input = document.createElement('input');
         input.type = field.type;
         if (field.placeholder) input.placeholder = field.placeholder;
