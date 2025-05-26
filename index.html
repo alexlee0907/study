@@ -43,10 +43,6 @@
       padding: 5px;
       font-size: 1em;
     }
-    input[type="date"] {
-      position: absolute;
-      left: -9999px; /* 화면 밖으로 숨김 */
-    }
     input[type="text"].small-input {
       width: 90px;
       font-size: 0.85em;
@@ -147,71 +143,64 @@
 
     categoryFields[category].forEach(field => {
       const label = document.createElement('label');
-      // label.textContent = field.label + ': '; // 텍스트는 직접 만듦 아래에서
 
-      let input;
       if (field.type === 'select') {
         label.textContent = field.label + ': ';
-        input = document.createElement('select');
+        const select = document.createElement('select');
         field.options.forEach(opt => {
           const option = document.createElement('option');
           option.value = opt;
           option.textContent = opt;
-          input.appendChild(option);
+          select.appendChild(option);
         });
-        label.appendChild(input);
-      } else if (field.type === 'date') {
-        // 마감일은 특별 처리: label 클릭 시 달력, 완료 후 텍스트 변경
+        label.appendChild(select);
+        inputs.push(select);
 
-        // label에 마감일 텍스트 먼저 넣음
+      } else if (field.type === 'date') {
+        // 마감일 텍스트만 만들고 달력은 임시 input으로 처리
+
         const dateLabelText = document.createElement('span');
         dateLabelText.textContent = field.label;
-        label.appendChild(dateLabelText);
+        dateLabelText.style.cursor = 'pointer';
 
-        // 숨겨진 input[type=date]
-        input = document.createElement('input');
-        input.type = 'date';
+        // 임시 input[type=date], 화면에는 추가하지 않고 body에 숨김으로 추가
+        const tempInput = document.createElement('input');
+        tempInput.type = 'date';
+        tempInput.style.position = 'absolute';
+        tempInput.style.left = '-9999px';
+        document.body.appendChild(tempInput);
 
-        // label 클릭 시 input[type=date] 클릭 트리거
-        label.style.cursor = 'pointer';
-        label.onclick = (e) => {
-          // label 클릭이 input 클릭으로 이어지지 않게 이벤트 버블링 방지
-          if(e.target !== input) {
-            input.showPicker ? input.showPicker() : input.click();
-          }
-        };
-
-        // input 값 변경시 표시 텍스트 교체
-        input.addEventListener('change', () => {
-          const dateVal = input.value;
-          if (dateVal) {
-            const date = new Date(dateVal);
+        tempInput.addEventListener('change', () => {
+          if (tempInput.value) {
+            const date = new Date(tempInput.value);
             const yy = String(date.getFullYear()).slice(2);
             const mm = String(date.getMonth() + 1).padStart(2, '0');
             const dd = String(date.getDate()).padStart(2, '0');
             dateLabelText.textContent = `${yy}-${mm}-${dd}`;
-            // 클릭시 다시 달력 나오도록 유지
           } else {
             dateLabelText.textContent = field.label;
           }
         });
 
-        // 화면에서 숨김
-        input.style.position = 'absolute';
-        input.style.left = '-9999px';
+        dateLabelText.addEventListener('click', () => {
+          tempInput.value = '';
+          tempInput.click();
+        });
 
-        label.appendChild(input);
+        label.appendChild(dateLabelText);
+        inputs.push(tempInput);
+
       } else {
         label.textContent = field.label + ': ';
-        input = document.createElement('input');
+        const input = document.createElement('input');
         input.type = field.type;
         if (field.placeholder) input.placeholder = field.placeholder;
         if (field.className) input.className = field.className;
         label.appendChild(input);
+        inputs.push(input);
       }
 
       taskDiv.appendChild(label);
-      inputs.push(input);
     });
 
     // 버튼 생성
