@@ -53,7 +53,7 @@
 <div id="students">
 <script>
   const students = ['JH', 'HJ'];
-  // 숙제에 범위 필드 추가 (숙제범위 대신 범위 명칭 사용)
+  // 숙제에 범위 필드 추가 (필드명 ‘범위’로 통일)
   const categoryFields = {
     '숙제': [
       { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
@@ -141,7 +141,7 @@
 
     // 버튼 생성
     const btnSave = document.createElement('button');
-    btnSave.textContent = '입력';  // 버튼명 변경
+    btnSave.textContent = '입력';  // 버튼명 확실히 '입력'으로
 
     const btnCancelInput = document.createElement('button');
     btnCancelInput.textContent = '취소';
