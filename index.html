@@ -16,9 +16,6 @@
       margin-bottom: 30px;
       background: white;
     }
-    h2 {
-      margin-bottom: 15px;
-    }
     .category {
       margin-top: 20px;
     }
@@ -26,7 +23,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 5px;
     }
     .task {
       display: flex;
@@ -46,18 +42,6 @@
     input[type="text"].small-input {
       width: 90px;
       font-size: 0.85em;
-      flex-shrink: 1;
-    }
-    .task label {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      flex-wrap: nowrap;
-      cursor: pointer;
-      user-select: none;
-    }
-    .task input[type="text"] {
-      min-width: 0;
     }
     .date-label {
       display: inline-block;
@@ -68,22 +52,13 @@
       font-weight: 600;
       font-size: 0.9em;
       color: #005bbb;
-      user-select: none;
       cursor: pointer;
-      transition: background-color 0.25s ease, color 0.25s ease;
       min-width: 75px;
       text-align: center;
     }
-    .date-label:hover {
-      background-color: #3399ff;
-      color: white;
-    }
     @media (max-width: 600px) {
       .task {
-        flex-wrap: wrap;
-      }
-      .task label {
-        flex: 1 1 auto;
+        flex-direction: column;
       }
     }
   </style>
@@ -94,22 +69,22 @@
   <h2>JH</h2>
 
   <div class="category" id="숙제-JH">
-    <h3>숙제 <button onclick="addTask('JH', '숙제')">+ 추가</button></h3>
+    <h3>숙제 <button class="add-btn" data-student="JH" data-category="숙제">+ 추가</button></h3>
     <div class="task-list"></div>
   </div>
 
   <div class="category" id="공부-JH">
-    <h3>공부 <button onclick="addTask('JH', '공부')">+ 추가</button></h3>
+    <h3>공부 <button class="add-btn" data-student="JH" data-category="공부">+ 추가</button></h3>
     <div class="task-list"></div>
   </div>
 
   <div class="category" id="시험-JH">
-    <h3>시험 <button onclick="addTask('JH', '시험')">+ 추가</button></h3>
+    <h3>시험 <button class="add-btn" data-student="JH" data-category="시험">+ 추가</button></h3>
     <div class="task-list"></div>
   </div>
 
   <div class="category" id="수행평가-JH">
-    <h3>수행평가 <button onclick="addTask('JH', '수행평가')">+ 추가</button></h3>
+    <h3>수행평가 <button class="add-btn" data-student="JH" data-category="수행평가">+ 추가</button></h3>
     <div class="task-list"></div>
   </div>
 
@@ -124,195 +99,62 @@
   </div>
 </div>
 
-<!-- Firebase JS SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getDatabase, ref, set, remove, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-<script>
-  // Firebase 설정 (복사해둔 내 config로 교체)
   const firebaseConfig = {
     apiKey: "AIzaSyBuhnhDDgnZkNMfFo3_0EsGrJzezKbTpZs",
     authDomain: "study-fbdae.firebaseapp.com",
     databaseURL: "https://study-fbdae-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "study-fbdae",
-    storageBucket: "study-fbdae.firebasestorage.app",
+    storageBucket: "study-fbdae.appspot.com",
     messagingSenderId: "427130427133",
-    appId: "1:427130427133:web:6e836cbbcd134fcde7d094",
-    measurementId: "G-M26YMNRFRV"
+    appId: "1:427130427133:web:6e836cbbcd134fcde7d094"
   };
 
-  // Firebase 초기화
-  firebase.initializeApp(firebaseConfig);
-  firebase.analytics();
-  const db = firebase.database();
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-  // 카테고리별 필드 정의
   const categoryFields = {
     '숙제': [
       { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
-      { label: '범위', type: 'text', placeholder: '예: 1~3쪽' },
+      { label: '범위', type: 'text' },
       { label: '마감일', type: 'date' }
     ],
     '공부': [
-      { label: '과목', type: 'text', placeholder: '예: 사회', className: 'small-input' },
-      { label: '범위', type: 'text', placeholder: '예: 3~5단원' },
+      { label: '과목', type: 'text' },
+      { label: '범위', type: 'text' },
       { label: '마감일', type: 'date' }
     ],
     '시험': [
-      { label: '과목', type: 'text', placeholder: '예: 역사', className: 'small-input' },
-      { label: '범위', type: 'text', placeholder: '예: 1~4단원' },
+      { label: '과목', type: 'text' },
+      { label: '범위', type: 'text' },
       { label: '마감일', type: 'date' }
     ],
     '수행평가': [
-      { label: '내용', type: 'text', placeholder: '예: 발표 준비' },
+      { label: '내용', type: 'text' },
       { label: '마감일', type: 'date' }
-    ],
-    'completed': [],
-    'deleted': []
+    ]
   };
 
-  // DB 저장 함수
-  function saveTaskToDB(student, category, taskId, taskData) {
-    firebase.database().ref(`tasks/${student}/${category}/${taskId}`).set(taskData);
+  function saveTask(student, category, taskId, taskData) {
+    set(ref(db, `tasks/${student}/${category}/${taskId}`), taskData);
   }
 
-  // DB 삭제 함수
-  function deleteTaskFromDB(student, category, taskId) {
-    firebase.database().ref(`tasks/${student}/${category}/${taskId}`).remove();
-  }
-
-  // DB 업데이트 함수
-  function updateTaskInDB(student, category, taskId, updates) {
-    firebase.database().ref(`tasks/${student}/${category}/${taskId}`).update(updates);
-  }
-
-  // DB에서 불러와 화면에 렌더링
-  function loadTasksFromDB(student, category) {
-    const categoryRef = firebase.database().ref(`tasks/${student}/${category}`);
-    categoryRef.on('value', (snapshot) => {
-      const taskListDiv = document.querySelector(`#${category}-${student} .task-list`);
-      if (!taskListDiv) return;
-      taskListDiv.innerHTML = '';
-
-      const data = snapshot.val();
-      if (data) {
-        Object.entries(data).forEach(([taskId, taskData]) => {
-          renderTaskFromData(student, category, taskId, taskData);
-        });
-      }
-    });
-  }
-
-  // DB 데이터로 task 생성
-  function renderTaskFromData(student, category, taskId, taskData) {
-    const taskDiv = document.createElement('div');
-    taskDiv.className = 'task';
-    taskDiv.dataset.student = student;
-    taskDiv.dataset.category = category;
-    taskDiv.dataset.taskId = taskId;
-
-    for (const field of categoryFields[category] || []) {
-      const label = document.createElement('label');
-      let value = taskData[field.label] || '';
-
-      if (field.type === 'select') {
-        label.textContent = field.label + ': ';
-        const select = document.createElement('select');
-        field.options.forEach(opt => {
-          const option = document.createElement('option');
-          option.value = opt;
-          option.textContent = opt;
-          if (opt === value) option.selected = true;
-          select.appendChild(option);
-        });
-        select.disabled = true;
-        label.appendChild(select);
-      } else if (field.type === 'date') {
-        const dateLabelText = document.createElement('span');
-        dateLabelText.className = 'date-label';
-        if (value) {
-          const date = new Date(value);
-          const yy = String(date.getFullYear()).slice(2);
-          const mm = String(date.getMonth() + 1).padStart(2, '0');
-          const dd = String(date.getDate()).padStart(2, '0');
-          dateLabelText.textContent = `${yy}-${mm}-${dd}`;
-        } else {
-          dateLabelText.textContent = field.label;
-        }
-        label.appendChild(dateLabelText);
-      } else {
-        label.textContent = field.label + ': ';
-        const input = document.createElement('input');
-        input.type = field.type;
-        if (field.placeholder) input.placeholder = field.placeholder;
-        if (field.className) input.className = field.className;
-        input.value = value;
-        input.disabled = true;
-        label.appendChild(input);
-      }
-      taskDiv.appendChild(label);
-    }
-
-    const btnComplete = document.createElement('button');
-    btnComplete.textContent = '완료';
-
-    const btnDelete = document.createElement('button');
-    btnDelete.textContent = '삭제';
-
-    const btnRestore = document.createElement('button');
-    btnRestore.textContent = '복구';
-
-    if (category === 'completed') {
-      btnComplete.style.display = 'none';
-      btnDelete.style.display = 'inline';
-      btnRestore.style.display = 'none';
-    } else if (category === 'deleted') {
-      btnComplete.style.display = 'none';
-      btnDelete.style.display = 'none';
-      btnRestore.style.display = 'inline';
-    } else {
-      btnComplete.style.display = 'inline';
-      btnDelete.style.display = 'inline';
-      btnRestore.style.display = 'none';
-    }
-
-    btnComplete.onclick = () => {
-      updateTaskInDB(student, category, taskId, { done: true });
-      // 완료 카테고리로 이동
-      moveTask(student, category, 'completed', taskId, taskData);
-    };
-
-    btnDelete.onclick = () => {
-      moveTask(student, category, 'deleted', taskId, taskData);
-    };
-
-    btnRestore.onclick = () => {
-      moveTask(student, 'deleted', '숙제', taskId, taskData);
-    };
-
-    taskDiv.appendChild(btnComplete);
-    taskDiv.appendChild(btnDelete);
-    taskDiv.appendChild(btnRestore);
-
-    document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
-  }
-
-  // 새 task 추가 함수
   function addTask(student, category) {
-    const categoryDiv = document.querySelector(`#${category}-${student} .task-list`);
-    if (!categoryDiv) return;
-
     const taskDiv = document.createElement('div');
     taskDiv.className = 'task';
 
-    const newTaskId = Date.now().toString();
+    const taskData = {};
+    const inputs = [];
 
-    for (const field of categoryFields[category] || []) {
+    categoryFields[category].forEach(field => {
       const label = document.createElement('label');
-      label.textContent = field.label + ': ';
+      label.textContent = field.label + ": ";
 
       let input;
+
       if (field.type === 'select') {
         input = document.createElement('select');
         field.options.forEach(opt => {
@@ -321,76 +163,47 @@
           option.textContent = opt;
           input.appendChild(option);
         });
-      } else if (field.type === 'date') {
-        input = document.createElement('input');
-        input.type = 'date';
       } else {
         input = document.createElement('input');
         input.type = field.type;
-        if (field.placeholder) input.placeholder = field.placeholder;
-        if (field.className) input.className = field.className;
       }
 
       label.appendChild(input);
       taskDiv.appendChild(label);
-    }
+      inputs.push({ label: field.label, input });
+    });
 
-    // 추가 버튼
-    const btnSave = document.createElement('button');
-    btnSave.textContent = '저장';
-
-    btnSave.onclick = () => {
-      const taskData = {};
-      const inputs = taskDiv.querySelectorAll('input, select');
-      let valid = true;
-
-      inputs.forEach((input, i) => {
-        if (!input.value) {
-          alert('모든 항목을 입력해주세요.');
-          valid = false;
-          return;
-        }
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = '저장';
+    saveBtn.onclick = () => {
+      inputs.forEach(({ label, input }) => {
+        taskData[label] = input.value;
       });
 
-      if (!valid) return;
-
-      // 입력값 taskData에 저장
-      const fields = categoryFields[category];
-      fields.forEach((field, idx) => {
-        taskData[field.label] = inputs[idx].value;
-      });
-      taskData.done = false;
-
-      saveTaskToDB(student, category, newTaskId, taskData);
-      // 저장 후 화면에 표시하기 위해 다시 불러오기 (또는 새로 렌더)
-      // 여기서는 실시간 DB 리스너가 자동 반영하므로 불러올 필요 없음
-
-      // 입력창 제거
+      const taskId = Date.now().toString();
+      saveTask(student, category, taskId, taskData);
       taskDiv.remove();
     };
 
-    const btnCancel = document.createElement('button');
-    btnCancel.textContent = '취소';
-    btnCancel.onclick = () => {
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = '취소';
+    cancelBtn.onclick = () => {
       taskDiv.remove();
     };
 
-    taskDiv.appendChild(btnSave);
-    taskDiv.appendChild(btnCancel);
+    taskDiv.appendChild(saveBtn);
+    taskDiv.appendChild(cancelBtn);
 
-    categoryDiv.appendChild(taskDiv);
+    document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
   }
 
-  // 카테고리간 이동 (예: 삭제, 완료, 복구)
-  function moveTask(student, fromCategory, toCategory, taskId, taskData) {
-    deleteTaskFromDB(student, fromCategory, taskId);
-    saveTaskToDB(student, toCategory, taskId, taskData);
-  }
-
-  // 초기 데이터 로드
-  const categories = ['숙제', '공부', '시험', '수행평가', 'completed', 'deleted'];
-  categories.forEach(cat => loadTasksFromDB('JH', cat));
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const student = btn.dataset.student;
+      const category = btn.dataset.category;
+      addTask(student, category);
+    });
+  });
 </script>
-
 </body>
 </html>
