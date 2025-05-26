@@ -1,210 +1,231 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>학생 일정 관리</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 20px;
-      background-color: #f4f4f4;
-    }
-    .student-section {
-      border: 1px solid #ccc;
-      padding: 20px;
-      margin-bottom: 30px;
-      background: white;
-    }
-    h2 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .category {
-      margin-top: 20px;
-    }
-    .category h3 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-    .task {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 10px;
-      align-items: center;
-      border: 1px solid #ddd;
-      padding: 8px;
-      border-radius: 4px;
-      background: #fafafa;
-    }
-    input, select, button {
-      padding: 5px;
-      font-size: 1em;
-    }
-    .calendar-view {
-      margin-top: 10px;
-      background: #e9ecef;
-      padding: 10px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>학생 일정 관리</title>
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+  }
+  .student-section {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 30px;
+    background: white;
+  }
+  h2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .category {
+    margin-top: 20px;
+  }
+  .category h3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  .task {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 4px;
+    background: #fafafa;
+  }
+  input, select, button {
+    padding: 5px;
+    font-size: 1em;
+  }
+  .calendar-view {
+    margin-top: 10px;
+    background: #e9ecef;
+    padding: 10px;
+  }
+</style>
 </head>
 <body>
 
-  <div id="students">
-    <script>
-      const students = ['JH', 'HJ'];
-      const categoryFields = {
-        '숙제': [
-          { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
-          { label: '마감일', type: 'date' }
-        ],
-        '공부': [
-          { label: '과목', type: 'text', placeholder: '예: 사회' },
-          { label: '범위', type: 'text', placeholder: '예: 3~5단원' },
-          { label: '마감일', type: 'date' }
-        ],
-        '시험': [
-          { label: '과목', type: 'text', placeholder: '예: 역사' },
-          { label: '범위', type: 'text', placeholder: '예: 1~4단원' },
-          { label: '마감일', type: 'date' }
-        ],
-        '수행평가': [
-          { label: '내용', type: 'text', placeholder: '예: 발표 준비' },
-          { label: '마감일', type: 'date' }
-        ]
-      };
+<div id="students">
+<script>
+  const students = ['JH', 'HJ'];
+  const categoryFields = {
+    '숙제': [
+      { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
+      { label: '마감일', type: 'date' }
+    ],
+    '공부': [
+      { label: '과목', type: 'text', placeholder: '예: 사회' },
+      { label: '범위', type: 'text', placeholder: '예: 3~5단원' },
+      { label: '마감일', type: 'date' }
+    ],
+    '시험': [
+      { label: '과목', type: 'text', placeholder: '예: 역사' },
+      { label: '범위', type: 'text', placeholder: '예: 1~4단원' },
+      { label: '마감일', type: 'date' }
+    ],
+    '수행평가': [
+      { label: '내용', type: 'text', placeholder: '예: 발표 준비' },
+      { label: '마감일', type: 'date' }
+    ]
+  };
 
-      students.forEach(student => {
-        document.write(`<div class="student-section" id="student-${student}">
-          <h2>
-            ${student}
-            <button onclick="sendToTelegram('${student}')">전송 건</button>
-          </h2>
-          <div id="categories-${student}">`);
+  students.forEach(student => {
+    document.write(`<div class="student-section" id="student-${student}">
+      <h2>
+        ${student}
+        <button onclick="sendToTelegram('${student}')">전송 건</button>
+      </h2>
+      <div id="categories-${student}">`);
 
-        for (const cat in categoryFields) {
-          document.write(`
-            <div class="category" id="${cat}-${student}">
-              <h3>${cat}
-                <button onclick="addTask('${student}', '${cat}')">+ 추가</button>
-              </h3>
-              <div class="task-list"></div>
-            </div>
-          `);
-        }
+    for (const cat in categoryFields) {
+      document.write(`
+        <div class="category" id="${cat}-${student}">
+          <h3>${cat}
+            <button onclick="addTask('${student}', '${cat}')">+ 추가</button>
+          </h3>
+          <div class="task-list"></div>
+        </div>
+      `);
+    }
 
-        // 완료, 취소 영역 추가
-        document.write(`
-          <div class="category" id="completed-${student}">
-            <h3>완료된 항목</h3>
-            <div class="task-list"></div>
-          </div>
-          <div class="category" id="cancelled-${student}">
-            <h3>취소된 항목</h3>
-            <div class="task-list"></div>
-          </div>
-        `);
+    // 완료, 삭제 영역 추가
+    document.write(`
+      <div class="category" id="completed-${student}">
+        <h3>완료된 항목</h3>
+        <div class="task-list"></div>
+      </div>
+      <div class="category" id="deleted-${student}">
+        <h3>삭제된 항목</h3>
+        <div class="task-list"></div>
+      </div>
+    `);
 
-        document.write(`<div id="calendar-${student}" class="calendar-view">
-          [${student}] 월간 보기 영역입니다.
-        </div></div>`);
-      });
+    document.write(`<div id="calendar-${student}" class="calendar-view">
+      [${student}] 월간 보기 영역입니다.
+    </div></div>`);
+  });
 
-      function sendToTelegram(student) {
-        alert(`${student}의 데이터를 텔레그램으로 전송합니다 (API 연동 필요)`);
-      }
+  function sendToTelegram(student) {
+    alert(`${student}의 데이터를 텔레그램으로 전송합니다 (API 연동 필요)`);
+  }
 
-      function addTask(student, category) {
-        const taskDiv = document.createElement('div');
-        taskDiv.className = 'task';
+  function addTask(student, category) {
+    const taskDiv = document.createElement('div');
+    taskDiv.className = 'task';
 
-        const inputs = [];
+    const inputs = [];
 
-        categoryFields[category].forEach(field => {
-          const label = document.createElement('label');
-          label.style.marginRight = '10px';
-          label.textContent = field.label + ': ';
+    categoryFields[category].forEach(field => {
+      const label = document.createElement('label');
+      label.style.marginRight = '10px';
+      label.textContent = field.label + ': ';
 
-          let input;
-          if (field.type === 'select') {
-            input = document.createElement('select');
-            field.options.forEach(opt => {
-              const option = document.createElement('option');
-              option.value = opt;
-              option.textContent = opt;
-              input.appendChild(option);
-            });
-          } else {
-            input = document.createElement('input');
-            input.type = field.type;
-            if (field.placeholder) input.placeholder = field.placeholder;
-          }
-
-          label.appendChild(input);
-          taskDiv.appendChild(label);
-          inputs.push(input);
+      let input;
+      if (field.type === 'select') {
+        input = document.createElement('select');
+        field.options.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          input.appendChild(option);
         });
-
-        // 버튼들
-        const btnConfirm = document.createElement('button');
-        btnConfirm.textContent = '입력';
-        btnConfirm.onclick = () => {
-          inputs.forEach(input => {
-            if(input.value === '') {
-              alert('모든 항목을 입력해주세요.');
-              return;
-            }
-          });
-          inputs.forEach(input => input.disabled = true);
-          btnConfirm.style.display = 'none';
-          btnCancel.style.display = 'inline';
-          btnComplete.style.display = 'inline';
-        };
-
-        const btnCancel = document.createElement('button');
-        btnCancel.textContent = '취소';
-        btnCancel.style.display = 'none';
-        btnCancel.onclick = () => {
-          // 취소된 항목 영역으로 이동
-          inputs.forEach(input => input.disabled = true);
-          btnConfirm.style.display = 'none';
-          btnCancel.style.display = 'none';
-          btnComplete.style.display = 'none';
-
-          // 버튼들 제거
-          taskDiv.querySelectorAll('button').forEach(b => b.remove());
-
-          document.querySelector(`#cancelled-${student} .task-list`).appendChild(taskDiv);
-        };
-
-        const btnComplete = document.createElement('button');
-        btnComplete.textContent = '완료';
-        btnComplete.style.display = 'none';
-        btnComplete.onclick = () => {
-          // 완료된 항목 영역으로 이동
-          inputs.forEach(input => input.disabled = true);
-          btnConfirm.style.display = 'none';
-          btnCancel.style.display = 'none';
-          btnComplete.style.display = 'none';
-
-          // 버튼들 제거
-          taskDiv.querySelectorAll('button').forEach(b => b.remove());
-
-          document.querySelector(`#completed-${student} .task-list`).appendChild(taskDiv);
-        };
-
-        taskDiv.appendChild(btnConfirm);
-        taskDiv.appendChild(btnCancel);
-        taskDiv.appendChild(btnComplete);
-
-        document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
+      } else {
+        input = document.createElement('input');
+        input.type = field.type;
+        if (field.placeholder) input.placeholder = field.placeholder;
       }
-    </script>
-  </div>
+
+      label.appendChild(input);
+      taskDiv.appendChild(label);
+      inputs.push(input);
+    });
+
+    // 버튼 생성
+    const btnInput = document.createElement('button');
+    btnInput.textContent = '입력';
+
+    const btnCancel = document.createElement('button');
+    btnCancel.textContent = '취소';
+
+    const btnComplete = document.createElement('button');
+    btnComplete.textContent = '완료';
+    btnComplete.style.display = 'none';
+
+    const btnDelete = document.createElement('button');
+    btnDelete.textContent = '삭제';
+    btnDelete.style.display = 'none';
+
+    // 입력 버튼 클릭
+    btnInput.onclick = () => {
+      // 빈 값 체크
+      for (const input of inputs) {
+        if (!input.value) {
+          alert('모든 항목을 입력해주세요.');
+          return;
+        }
+      }
+      // 입력 완료 상태로 전환
+      inputs.forEach(input => input.disabled = true);
+      btnInput.style.display = 'none';
+      btnCancel.style.display = 'none';
+
+      btnComplete.style.display = 'inline';
+      btnDelete.style.display = 'inline';
+    };
+
+    // 취소 버튼 클릭 (추가한 태스크 삭제)
+    btnCancel.onclick = () => {
+      taskDiv.remove();
+    };
+
+    // 완료 버튼 클릭
+    btnComplete.onclick = () => {
+      // 완료된 영역으로 이동
+      inputs.forEach(input => input.disabled = true);
+      btnComplete.style.display = 'none';
+      btnDelete.style.display = 'none';
+      btnInput.style.display = 'none';
+      btnCancel.style.display = 'none';
+
+      // 버튼 모두 제거 (버튼 영역 비우기)
+      [btnInput, btnCancel, btnComplete, btnDelete].forEach(b => b.remove());
+
+      document.querySelector(`#completed-${student} .task-list`).appendChild(taskDiv);
+    };
+
+    // 삭제 버튼 클릭
+    btnDelete.onclick = () => {
+      // 삭제된 영역으로 이동
+      inputs.forEach(input => input.disabled = true);
+      btnComplete.style.display = 'none';
+      btnDelete.style.display = 'none';
+      btnInput.style.display = 'none';
+      btnCancel.style.display = 'none';
+
+      // 버튼 모두 제거
+      [btnInput, btnCancel, btnComplete, btnDelete].forEach(b => b.remove());
+
+      document.querySelector(`#deleted-${student} .task-list`).appendChild(taskDiv);
+    };
+
+    taskDiv.appendChild(btnInput);
+    taskDiv.appendChild(btnCancel);
+    taskDiv.appendChild(btnComplete);
+    taskDiv.appendChild(btnDelete);
+
+    document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
+  }
+</script>
+</div>
 
 </body>
 </html>
