@@ -53,11 +53,11 @@
 <div id="students">
 <script>
   const students = ['JH', 'HJ'];
-  // 숙제에 숙제범위 추가
+  // 숙제에 범위 필드 추가 (숙제범위 대신 범위 명칭 사용)
   const categoryFields = {
     '숙제': [
       { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
-      { label: '숙제범위', type: 'text', placeholder: '예: 1~3쪽' },
+      { label: '범위', type: 'text', placeholder: '예: 1~3쪽' },
       { label: '마감일', type: 'date' }
     ],
     '공부': [
@@ -141,7 +141,7 @@
 
     // 버튼 생성
     const btnSave = document.createElement('button');
-    btnSave.textContent = '입력 완료';
+    btnSave.textContent = '입력';  // 버튼명 변경
 
     const btnCancelInput = document.createElement('button');
     btnCancelInput.textContent = '취소';
@@ -184,30 +184,23 @@
     // 완료 버튼 클릭
     btnComplete.onclick = () => {
       if (confirm('이 항목을 완료 처리하시겠습니까?')) {
-        // 완료 영역으로 이동
         moveToArea(taskDiv, 'completed', student);
-
-        toggleButtonsAfterCompleteDelete(taskDiv, 'complete');
+        toggleButtonsAfterCompleteDelete(taskDiv);
       }
     };
 
     // 삭제 버튼 클릭
     btnDelete.onclick = () => {
       if (confirm('이 항목을 삭제하시겠습니까?')) {
-        // 삭제 영역으로 이동
         moveToArea(taskDiv, 'deleted', student);
-
-        toggleButtonsAfterCompleteDelete(taskDiv, 'delete');
+        toggleButtonsAfterCompleteDelete(taskDiv);
       }
     };
 
-    // 복구 버튼 클릭 (완료/삭제 항목에서 복구)
+    // 복구 버튼 클릭
     btnRestore.onclick = () => {
       if (confirm('이 항목을 복구하시겠습니까?')) {
-        // 원래 카테고리 영역으로 이동
         moveToArea(taskDiv, taskDiv.dataset.category, student);
-
-        // 입력 완료 상태 버튼으로 전환
         btnRestore.style.display = 'none';
         btnComplete.style.display = 'inline';
         btnDelete.style.display = 'inline';
@@ -218,11 +211,10 @@
       const targetSelector = (area === 'completed' || area === 'deleted')
         ? `#${area}-${student} .task-list`
         : `#${area}-${student} .task-list`;
-
       document.querySelector(targetSelector).appendChild(taskDiv);
     }
 
-    function toggleButtonsAfterCompleteDelete(taskDiv, type) {
+    function toggleButtonsAfterCompleteDelete(taskDiv) {
       btnComplete.style.display = 'none';
       btnDelete.style.display = 'none';
       btnSave.style.display = 'none';
@@ -230,7 +222,6 @@
 
       btnRestore.style.display = 'inline';
 
-      // 복구 시에는 입력폼 비활성화 유지
       inputs.forEach(input => input.disabled = true);
     }
 
