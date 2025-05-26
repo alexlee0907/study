@@ -60,6 +60,13 @@
     .task input[type="text"] {
       min-width: 0;
     }
+    .date-display {
+      font-size: 0.9em;
+      color: #555;
+      min-width: 70px;
+      text-align: center;
+      user-select: none;
+    }
     @media (max-width: 600px) {
       .task {
         flex-wrap: wrap;
@@ -150,32 +157,49 @@
           option.textContent = opt;
           input.appendChild(option);
         });
+        label.appendChild(input);
+      } else if (field.type === 'date') {
+        const wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.gap = '8px';
+
+        const dateInput = document.createElement('input');
+        dateInput.type = 'date';
+
+        const dateDisplay = document.createElement('span');
+        dateDisplay.className = 'date-display';
+
+        // 날짜 변경 시 yy-mm-dd 형식 표시
+        dateInput.addEventListener('change', () => {
+          const date = new Date(dateInput.value);
+          if (!isNaN(date)) {
+            const yy = String(date.getFullYear()).slice(2);
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            dateDisplay.textContent = `${yy}-${mm}-${dd}`;
+          } else {
+            dateDisplay.textContent = '';
+          }
+        });
+
+        wrapper.appendChild(dateInput);
+        wrapper.appendChild(dateDisplay);
+        label.appendChild(wrapper);
+        input = dateInput; // 검증 및 저장 용도
       } else {
         input = document.createElement('input');
         input.type = field.type;
         if (field.placeholder) input.placeholder = field.placeholder;
         if (field.className) input.className = field.className;
-
-        // 날짜 형식 변경 이벤트 추가
-        if (field.type === 'date') {
-          input.addEventListener('change', () => {
-            const date = new Date(input.value);
-            if (!isNaN(date)) {
-              input.dataset.originalValue = input.value; // 원본 저장
-              const yy = String(date.getFullYear()).slice(2);
-              const mm = String(date.getMonth() + 1).padStart(2, '0');
-              const dd = String(date.getDate()).padStart(2, '0');
-              input.value = `${yy}-${mm}-${dd}`;
-            }
-          });
-        }
+        label.appendChild(input);
       }
 
-      label.appendChild(input);
       taskDiv.appendChild(label);
       inputs.push(input);
     });
 
+    // 버튼 생성
     const btnSave = document.createElement('button');
     btnSave.textContent = '입력';
 
@@ -201,14 +225,7 @@
           return;
         }
       }
-      inputs.forEach(input => {
-        input.disabled = true;
-
-        if (input.type === 'date' && input.dataset.originalValue) {
-          input.dataset.displayValue = input.value; // yy-mm-dd
-          input.value = input.dataset.originalValue; // yyyy-mm-dd 저장
-        }
-      });
+      inputs.forEach(input => input.disabled = true);
       btnSave.style.display = 'none';
       btnCancelInput.style.display = 'none';
       btnComplete.style.display = 'inline';
