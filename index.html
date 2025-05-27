@@ -65,6 +65,15 @@
       min-width: 75px;
       text-align: center;
     }
+    .toggle-btn {
+      font-size: 0.85em;
+      margin-left: 10px;
+      cursor: pointer;
+      background: none;
+      border: 1px solid #ccc;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
     @media (max-width: 600px) {
       .task {
         flex-direction: column;
@@ -82,34 +91,40 @@
   <h2>JH</h2>
 
   <div class="category" id="숙제-JH">
-    <h3>숙제 <button class="add-btn" data-student="JH" data-category="숙제">+ 추가</button></h3>
+    <h3>숙제 <button class="add-btn" data-student="JH" data-category="숙제">추가</button></h3>
     <div class="task-list"></div>
   </div>
 
   <div class="category" id="공부-JH">
-    <h3>공부 <button class="add-btn" data-student="JH" data-category="공부">+ 추가</button></h3>
+    <h3>공부 <button class="add-btn" data-student="JH" data-category="공부">추가</button></h3>
     <div class="task-list"></div>
   </div>
 
   <div class="category" id="시험-JH">
-    <h3>시험 <button class="add-btn" data-student="JH" data-category="시험">+ 추가</button></h3>
+    <h3>시험 <button class="add-btn" data-student="JH" data-category="시험">추가</button></h3>
     <div class="task-list"></div>
   </div>
 
   <div class="category" id="수행평가-JH">
-    <h3>수행평가 <button class="add-btn" data-student="JH" data-category="수행평가">+ 추가</button></h3>
+    <h3>수행평가 <button class="add-btn" data-student="JH" data-category="수행평가">추가</button></h3>
     <div class="task-list"></div>
   </div>
 
   <div class="category" id="completed-JH">
-    <h3>완료된 항목</h3>
+    <h3>
+      완료된 항목
+      <button class="toggle-btn" data-target="completed-JH">접기</button>
+    </h3>
     <div class="task-list"></div>
   </div>
 
   <div class="category" id="deleted-JH">
     <h3>
       삭제된 항목
-      <button class="clear-deleted-btn" data-student="JH">비우기</button>
+      <div>
+        <button class="toggle-btn" data-target="deleted-JH">접기</button>
+        <button class="clear-deleted-btn" data-student="JH">비우기</button>
+      </div>
     </h3>
     <div class="task-list"></div>
   </div>
@@ -190,6 +205,18 @@
       if (confirm('삭제된 항목을 모두 비우시겠습니까?')) {
         clearDeletedTasks(student);
       }
+    });
+  });
+
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const section = document.querySelector(`#${targetId} .task-list`);
+      if (!section) return;
+
+      const isHidden = section.style.display === 'none';
+      section.style.display = isHidden ? 'block' : 'none';
+      btn.textContent = isHidden ? '접기' : '펴기';
     });
   });
 
@@ -285,7 +312,6 @@
       const subject = taskData['과목'] || '';
       const content = taskData['범위'] || taskData['내용'] || '';
 
-      // 빈 항목 방지
       if (!date && !subject && !content) return;
 
       const taskDiv = document.createElement('div');
