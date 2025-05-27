@@ -158,7 +158,7 @@
     if (!isoDate) return '';
     const date = new Date(isoDate);
     if (isNaN(date)) return isoDate;
-    return date.toISOString().slice(2, 10); // 'yy-mm-dd'
+    return date.toISOString().slice(2, 10);
   }
 
   function saveTask(student, category, taskId, taskData) {
@@ -260,7 +260,7 @@
     if (!container) return;
 
     container.innerHTML = '';
-    if (!tasks) return;
+    if (!tasks || Object.keys(tasks).length === 0) return;
 
     const taskEntries = Object.entries(tasks);
 
@@ -277,21 +277,21 @@
 
       const dateA = taskA['마감일'] || '';
       const dateB = taskB['마감일'] || '';
-      if (dateA < dateB) return -1;
-      if (dateA > dateB) return 1;
-
-      return 0;
+      return dateA.localeCompare(dateB);
     });
 
     taskEntries.forEach(([taskId, taskData]) => {
-      const taskDiv = document.createElement('div');
-      taskDiv.className = 'task';
-
       const date = formatDateShort(taskData['마감일'] || '');
       const subject = taskData['과목'] || '';
       const content = taskData['범위'] || taskData['내용'] || '';
-      const summary = [date, subject, content].filter(Boolean).join(' / ');
 
+      // 빈 항목 방지
+      if (!date && !subject && !content) return;
+
+      const taskDiv = document.createElement('div');
+      taskDiv.className = 'task';
+
+      const summary = [date, subject, content].filter(Boolean).join(' / ');
       const summarySpan = document.createElement('span');
       summarySpan.textContent = summary;
       summarySpan.style.fontWeight = '500';
