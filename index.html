@@ -2,76 +2,207 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>학생 일정 관리</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>학생 일정 관리 - 애플 스타일</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Text:wght@400;600&display=swap');
+
+    /* 기본 스타일 */
     body {
-      font-family: sans-serif;
-      margin: 20px;
-      background-color: #f4f4f4;
+      font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 0; padding: 20px;
+      background: #f5f5f7;
+      color: #1c1c1e;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
     }
+
     .student-section {
-      border: 1px solid #ccc;
-      padding: 20px;
-      margin-bottom: 30px;
+      max-width: 480px;
+      margin: 0 auto;
       background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 30px 25px 40px;
     }
+
+    h2 {
+      font-weight: 700;
+      font-size: 2em;
+      margin-bottom: 25px;
+      color: #007aff;
+      user-select: none;
+    }
+
     .category {
-      margin-top: 20px;
+      margin-bottom: 30px;
     }
+
     .category h3 {
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-    .task {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 10px;
-      align-items: center;
-      border: 1px solid #ddd;
-      padding: 8px;
-      border-radius: 4px;
-      background: #fafafa;
-    }
-    .task span {
-      margin-right: 10px;
-    }
-    .btn-area button {
-      margin-left: 6px;
-      padding: 4px 8px;
-      font-size: 0.9em;
-      cursor: pointer;
-    }
-    input, select, button {
-      padding: 5px;
-      font-size: 1em;
-    }
-    input[type="text"].small-input {
-      width: 90px;
-      font-size: 0.85em;
-    }
-    .date-label {
-      display: inline-block;
-      padding: 3px 8px;
-      background-color: #d0eaff;
-      border: 1.5px solid #3399ff;
-      border-radius: 12px;
       font-weight: 600;
-      font-size: 0.9em;
-      color: #005bbb;
-      cursor: pointer;
-      min-width: 75px;
-      text-align: center;
+      font-size: 1.2em;
+      color: #1c1c1e;
+      margin-bottom: 16px;
+      user-select: none;
     }
-    @media (max-width: 600px) {
+
+    .add-btn {
+      background: #007aff;
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 1em;
+      padding: 6px 16px;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,122,255,0.4);
+      transition: background-color 0.25s ease;
+    }
+
+    .add-btn:hover {
+      background: #005ecb;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .task {
+      background: #f2f2f7;
+      border-radius: 15px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      user-select: none;
+    }
+
+    .task span {
+      font-weight: 500;
+      font-size: 0.95em;
+      color: #1c1c1e;
+      flex-grow: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 12px;
+    }
+
+    .date-label {
+      background-color: #d0eaff;
+      border-radius: 12px;
+      color: #007aff;
+      font-weight: 600;
+      font-size: 0.85em;
+      padding: 5px 12px;
+      min-width: 80px;
+      text-align: center;
+      flex-shrink: 0;
+      user-select: none;
+      box-shadow: 0 0 6px rgba(0,122,255,0.3);
+    }
+
+    .btn-area {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .btn-area button {
+      border: none;
+      background: #007aff;
+      color: white;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 14px;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+      user-select: none;
+      box-shadow: 0 2px 8px rgba(0,122,255,0.4);
+    }
+
+    .btn-area button:hover {
+      background: #005ecb;
+    }
+
+    /* 입력폼 스타일 */
+    .task input, .task select {
+      border: 1.5px solid #ccc;
+      border-radius: 12px;
+      padding: 7px 12px;
+      font-size: 0.95em;
+      outline-offset: 2px;
+      outline-color: #007aff;
+      width: 100%;
+      box-sizing: border-box;
+      font-weight: 400;
+      color: #1c1c1e;
+      transition: border-color 0.3s ease;
+      background: white;
+      user-select: text;
+    }
+
+    .task label {
+      flex: 1 1 100%;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      user-select: none;
+    }
+
+    .task select {
+      cursor: pointer;
+    }
+
+    .task button {
+      flex-shrink: 0;
+      min-width: 72px;
+      box-shadow: none;
+      margin-left: 10px;
+      background: #007aff;
+      user-select: none;
+    }
+
+    .task button:hover {
+      background: #005ecb;
+    }
+
+    /* 모바일 반응형 */
+    @media (max-width: 520px) {
+      body {
+        padding: 15px 12px;
+      }
+      .student-section {
+        padding: 25px 18px 30px;
+      }
       .task {
         flex-direction: column;
+        align-items: stretch;
+      }
+      .task span {
+        margin-bottom: 8px;
+        white-space: normal;
+      }
+      .btn-area {
+        justify-content: flex-end;
       }
       .btn-area button {
         margin-left: 0;
-        margin-top: 6px;
+      }
+      .task label {
+        font-size: 0.9em;
       }
     }
   </style>
@@ -107,9 +238,8 @@
   </div>
 
   <div class="category" id="deleted-JH">
-    <h3>
-      삭제된 항목
-      <button class="clear-deleted-btn" data-student="JH">비우기</button>
+    <h3>삭제된 항목
+      <button class="clear-deleted-btn" style="background:#ff3b30; margin-left:10px;">비우기</button>
     </h3>
     <div class="task-list"></div>
   </div>
@@ -154,223 +284,226 @@
     ]
   };
 
-  function formatDateShort(isoDate) {
-    if (!isoDate) return '';
-    const date = new Date(isoDate);
-    if (isNaN(date)) return isoDate;
-    return date.toISOString().slice(2, 10); // 'yy-mm-dd'
+  // 날짜 'yy-mm-dd' 포맷 함수
+  function formatDateShort(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '';
+    const yy = String(d.getFullYear()).slice(2);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yy}-${mm}-${dd}`;
   }
 
+  // DB 저장 함수
   function saveTask(student, category, taskId, taskData) {
     return set(ref(db, `tasks/${student}/${category}/${taskId}`), taskData);
   }
 
+  // DB 삭제 함수
   function deleteTask(student, category, taskId) {
     return remove(ref(db, `tasks/${student}/${category}/${taskId}`));
   }
 
-  async function moveTask(student, fromCategory, toCategory, taskId, taskData) {
-    await saveTask(student, toCategory, taskId, taskData);
-    await deleteTask(student, fromCategory, taskId);
+  // DOM 생성 헬퍼
+  function createElem(tag, attrs = {}, ...children) {
+    const el = document.createElement(tag);
+    for (const [key, val] of Object.entries(attrs)) {
+      if (key === 'className') el.className = val;
+      else if (key.startsWith('data-')) el.setAttribute(key, val);
+      else if (key === 'htmlFor') el.htmlFor = val;
+      else if (key === 'textContent') el.textContent = val;
+      else el.setAttribute(key, val);
+    }
+    children.flat().forEach(c => {
+      if (typeof c === 'string') el.appendChild(document.createTextNode(c));
+      else if (c) el.appendChild(c);
+    });
+    return el;
   }
 
-  function clearDeletedTasks(student) {
-    const deletedRef = ref(db, `tasks/${student}/deleted`);
-    remove(deletedRef)
-      .then(() => alert('삭제된 항목이 모두 비워졌습니다.'))
-      .catch(err => {
-        console.error(err);
-        alert('비우기 실패');
-      });
-  }
+  // task item 생성 (입력폼 or display)
+  function createTaskElement(student, category, taskId, data, isEditing = false) {
+    const taskDiv = createElem('div', { className: 'task', 'data-task-id': taskId });
 
-  document.querySelectorAll('.clear-deleted-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const student = btn.dataset.student;
-      if (confirm('삭제된 항목을 모두 비우시겠습니까?')) {
-        clearDeletedTasks(student);
-      }
-    });
-  });
-
-  function addTask(student, category) {
-    const taskDiv = document.createElement('div');
-    taskDiv.className = 'task';
-
-    const taskData = {};
-    const inputs = [];
-
-    categoryFields[category].forEach(field => {
-      const label = document.createElement('label');
-      label.textContent = field.label + ": ";
-
-      let input;
-      if (field.type === 'select') {
-        input = document.createElement('select');
-        field.options.forEach(opt => {
-          const option = document.createElement('option');
-          option.value = opt;
-          option.textContent = opt;
-          input.appendChild(option);
-        });
-      } else {
-        input = document.createElement('input');
-        input.type = field.type;
-      }
-
-      label.appendChild(input);
-      taskDiv.appendChild(label);
-      inputs.push({ label: field.label, input });
-    });
-
-    const saveBtn = document.createElement('button');
-    saveBtn.textContent = '입력';
-    saveBtn.onclick = async () => {
-      inputs.forEach(({ label, input }) => {
-        taskData[label] = input.value;
+    if (isEditing) {
+      // 입력폼
+      const fields = categoryFields[category] || [];
+      fields.forEach(({ label, type, options }) => {
+        let inputElem;
+        if (type === 'select' && options) {
+          inputElem = createElem('select', {});
+          options.forEach(opt => {
+            const optionElem = createElem('option', { value: opt, textContent: opt });
+            if (data[label] === opt) optionElem.selected = true;
+            inputElem.appendChild(optionElem);
+          });
+        } else {
+          inputElem = createElem('input', { type: type === 'date' ? 'date' : 'text', value: data[label] || '' });
+        }
+        const labelElem = createElem('label', {}, `${label}:`, inputElem);
+        taskDiv.appendChild(labelElem);
       });
 
-      if (Object.values(taskData).some(val => !val)) {
-        alert('모든 항목을 입력해주세요.');
-        return;
-      }
+      const saveBtn = createElem('button', { textContent: '저장' });
+      const cancelBtn = createElem('button', { textContent: '취소', style: 'background:#8e8e93; margin-left:8px;' });
 
-      const taskId = Date.now().toString();
-      try {
-        await saveTask(student, category, taskId, taskData);
-        taskDiv.remove();
-      } catch (e) {
-        alert('저장 실패');
-        console.error(e);
-      }
-    };
+      const btnArea = createElem('div', { className: 'btn-area' }, saveBtn, cancelBtn);
+      taskDiv.appendChild(btnArea);
 
-    const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = '취소';
-    cancelBtn.onclick = () => taskDiv.remove();
-
-    taskDiv.appendChild(saveBtn);
-    taskDiv.appendChild(cancelBtn);
-
-    document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
-  }
-
-  function renderTasks(student, category, tasks) {
-    const container = document.querySelector(`#${category}-${student} .task-list`);
-    if (!container) return;
-
-    container.innerHTML = '';
-    if (!tasks) return;
-
-    const taskEntries = Object.entries(tasks);
-
-    taskEntries.sort(([idA, taskA], [idB, taskB]) => {
-      const subjectA = (taskA['과목'] || '').toLowerCase();
-      const subjectB = (taskB['과목'] || '').toLowerCase();
-      if (subjectA < subjectB) return -1;
-      if (subjectA > subjectB) return 1;
-
-      const contentA = (taskA['내용'] || taskA['범위'] || '').toLowerCase();
-      const contentB = (taskB['내용'] || taskB['범위'] || '').toLowerCase();
-      if (contentA < contentB) return -1;
-      if (contentA > contentB) return 1;
-
-      const dateA = taskA['마감일'] || '';
-      const dateB = taskB['마감일'] || '';
-      if (dateA < dateB) return -1;
-      if (dateA > dateB) return 1;
-
-      return 0;
-    });
-
-    taskEntries.forEach(([taskId, taskData]) => {
-      const taskDiv = document.createElement('div');
-      taskDiv.className = 'task';
-
-      const date = formatDateShort(taskData['마감일'] || '');
-      const subject = taskData['과목'] || '';
-      const content = taskData['범위'] || taskData['내용'] || '';
-      const summary = [date, subject, content].filter(Boolean).join(' / ');
-
-      const summarySpan = document.createElement('span');
-      summarySpan.textContent = summary;
-      summarySpan.style.fontWeight = '500';
-      summarySpan.style.flexGrow = '1';
-      taskDiv.appendChild(summarySpan);
-
-      const btnArea = document.createElement('div');
-      btnArea.className = 'btn-area';
-
-      if (['completed', 'deleted'].includes(category.toLowerCase())) {
-        const restoreBtn = document.createElement('button');
-        restoreBtn.textContent = '복구';
-        restoreBtn.onclick = async () => {
-          if (!taskData.originalCategory) {
-            alert('복구할 원래 카테고리 정보가 없습니다.');
+      saveBtn.onclick = () => {
+        const inputs = taskDiv.querySelectorAll('input, select');
+        let valid = true;
+        const newData = {};
+        fields.forEach(({ label }, i) => {
+          const val = inputs[i].value.trim();
+          if (label === '마감일' && val && isNaN(new Date(val))) {
+            alert('유효한 날짜를 입력하세요.');
+            valid = false;
             return;
           }
-          const originalCategory = taskData.originalCategory;
-          const newTaskData = { ...taskData };
-          delete newTaskData.originalCategory;
-          try {
-            await moveTask(student, category, originalCategory, taskId, newTaskData);
-          } catch (e) {
-            alert('복구 실패');
-            console.error(e);
-          }
-        };
-        btnArea.appendChild(restoreBtn);
-      } else {
-        const completeBtn = document.createElement('button');
-        completeBtn.textContent = '완료';
-        completeBtn.onclick = async () => {
-          try {
-            await moveTask(student, category, 'completed', taskId, { ...taskData, originalCategory: category });
-          } catch (e) {
-            alert('완료 처리 실패');
-            console.error(e);
-          }
-        };
-        btnArea.appendChild(completeBtn);
+          newData[label] = val;
+        });
+        if (!valid) return;
+        saveTask(student, category, taskId, newData).then(() => {
+          loadTasks(student);
+        });
+      };
 
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = '삭제';
-        deleteBtn.onclick = async () => {
-          try {
-            await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
-          } catch (e) {
-            alert('삭제 처리 실패');
-            console.error(e);
+      cancelBtn.onclick = () => {
+        loadTasks(student);
+      };
+
+    } else {
+      // 일반 표시
+      // 날짜 표시 (앞에), 나머지 항목은 한 줄 텍스트로 연결
+      const dateVal = data['마감일'] || '';
+      const dateSpan = createElem('span', { className: 'date-label', textContent: formatDateShort(dateVal) });
+      taskDiv.appendChild(dateSpan);
+
+      // 나머지 텍스트: 과목이나 내용 + 범위 (숨김 텍스트 없이 간결하게)
+      let mainText = '';
+      for (const key in data) {
+        if (key !== '마감일') {
+          if (mainText) mainText += ' | ';
+          mainText += data[key];
+        }
+      }
+      const textSpan = createElem('span', { textContent: mainText || '내용 없음' });
+      taskDiv.appendChild(textSpan);
+
+      // 버튼 영역 : 수정, 삭제, 완료(완료 카테고리에는 삭제만)
+      const btnArea = createElem('div', { className: 'btn-area' });
+
+      if (category !== 'completed' && category !== 'deleted') {
+        const editBtn = createElem('button', { textContent: '수정' });
+        const deleteBtn = createElem('button', { textContent: '삭제', style: 'background:#ff3b30;' });
+        const completeBtn = createElem('button', { textContent: '완료', style: 'background:#34c759;' });
+
+        editBtn.onclick = () => {
+          loadTasks(student, category, taskId, true);
+        };
+        deleteBtn.onclick = () => {
+          if (confirm('삭제하면 복구 불가능합니다. 삭제할까요?')) {
+            deleteTask(student, category, taskId);
           }
         };
-        btnArea.appendChild(deleteBtn);
+        completeBtn.onclick = () => {
+          // 완료 카테고리로 이동
+          remove(ref(db, `tasks/${student}/${category}/${taskId}`)).then(() => {
+            saveTask(student, 'completed', taskId, data);
+          });
+        };
+
+        btnArea.append(editBtn, completeBtn, deleteBtn);
+      } else if (category === 'completed') {
+        const undoBtn = createElem('button', { textContent: '복구', style: 'background:#ff9500;' });
+        const deleteBtn = createElem('button', { textContent: '삭제', style: 'background:#ff3b30;' });
+
+        undoBtn.onclick = () => {
+          // 숙제, 공부, 시험, 수행평가 중 하나에 복구(여기서는 숙제로 일단 복구)
+          remove(ref(db, `tasks/${student}/completed/${taskId}`)).then(() => {
+            saveTask(student, '숙제', taskId, data);
+          });
+        };
+        deleteBtn.onclick = () => {
+          if (confirm('완전 삭제할까요?')) {
+            deleteTask(student, 'completed', taskId);
+          }
+        };
+
+        btnArea.append(undoBtn, deleteBtn);
+
+      } else if (category === 'deleted') {
+        // 비우기 버튼은 따로 있음. 그냥 비워진 공간 표시
+        // 빈 task는 비활성화된 느낌
+        taskDiv.style.opacity = '0.5';
+        taskDiv.style.pointerEvents = 'none';
       }
 
       taskDiv.appendChild(btnArea);
-      container.appendChild(taskDiv);
-    });
+    }
+
+    return taskDiv;
   }
 
-  function loadAllTasks(student) {
-    const categories = ['숙제', '공부', '시험', '수행평가', 'completed', 'deleted'];
-    categories.forEach(category => {
-      const tasksRef = ref(db, `tasks/${student}/${category}`);
-      onValue(tasksRef, snapshot => {
-        const data = snapshot.val();
-        renderTasks(student, category, data);
+  // 전체 로드 및 렌더링 함수
+  function loadTasks(student, editCategory = null, editTaskId = null, editing = false) {
+    const studentRef = ref(db, `tasks/${student}`);
+    onValue(studentRef, snapshot => {
+      const data = snapshot.val() || {};
+
+      // 각 카테고리 task-list 비우기
+      ['숙제', '공부', '시험', '수행평가', 'completed', 'deleted'].forEach(cat => {
+        const container = document.querySelector(`#${cat}-${student} .task-list`);
+        if (!container) return;
+        container.innerHTML = '';
+        const catData = data[cat] || {};
+        for (const [taskId, taskData] of Object.entries(catData)) {
+          let isEditing = editing && editCategory === cat && editTaskId === taskId;
+          const taskElem = createTaskElement(student, cat, taskId, taskData, isEditing);
+          container.appendChild(taskElem);
+        }
       });
+    }, { onlyOnce: true });
+  }
+
+  // 새로운 task 추가
+  function addTask(student, category) {
+    const taskId = Date.now().toString();
+    const defaultData = {};
+    (categoryFields[category] || []).forEach(({ label, type }) => {
+      defaultData[label] = '';
+    });
+    saveTask(student, category, taskId, defaultData).then(() => {
+      loadTasks(student, category, taskId, true);
     });
   }
 
+  // 삭제된 항목 비우기 (완전 삭제)
+  function clearDeleted(student) {
+    if (confirm('삭제된 항목을 완전히 비우시겠습니까?')) {
+      remove(ref(db, `tasks/${student}/deleted`)).then(() => {
+        loadTasks(student);
+      });
+    }
+  }
+
+  // 초기 세팅 및 이벤트 바인딩
   document.querySelectorAll('.add-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const student = btn.dataset.student;
-      const category = btn.dataset.category;
+    btn.addEventListener('click', e => {
+      const student = btn.getAttribute('data-student');
+      const category = btn.getAttribute('data-category');
       addTask(student, category);
     });
   });
 
-  loadAllTasks('JH');
+  document.querySelector('.clear-deleted-btn').addEventListener('click', () => {
+    clearDeleted('JH');
+  });
+
+  // 초기 로드
+  loadTasks('JH');
 </script>
 
 </body>
