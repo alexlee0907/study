@@ -107,7 +107,10 @@
   </div>
 
   <div class="category" id="deleted-JH">
-    <h3>삭제된 항목</h3>
+    <h3>
+      삭제된 항목
+      <button class="clear-deleted-btn" data-student="JH">비우기</button>
+    </h3>
     <div class="task-list"></div>
   </div>
 </div>
@@ -151,6 +154,13 @@
     ]
   };
 
+  function formatDateShort(isoDate) {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    if (isNaN(date)) return isoDate;
+    return date.toISOString().slice(2, 10); // 'yy-mm-dd'
+  }
+
   function saveTask(student, category, taskId, taskData) {
     return set(ref(db, `tasks/${student}/${category}/${taskId}`), taskData);
   }
@@ -163,6 +173,25 @@
     await saveTask(student, toCategory, taskId, taskData);
     await deleteTask(student, fromCategory, taskId);
   }
+
+  function clearDeletedTasks(student) {
+    const deletedRef = ref(db, `tasks/${student}/deleted`);
+    remove(deletedRef)
+      .then(() => alert('삭제된 항목이 모두 비워졌습니다.'))
+      .catch(err => {
+        console.error(err);
+        alert('비우기 실패');
+      });
+  }
+
+  document.querySelectorAll('.clear-deleted-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const student = btn.dataset.student;
+      if (confirm('삭제된 항목을 모두 비우시겠습니까?')) {
+        clearDeletedTasks(student);
+      }
+    });
+  });
 
   function addTask(student, category) {
     const taskDiv = document.createElement('div');
@@ -258,7 +287,7 @@
       const taskDiv = document.createElement('div');
       taskDiv.className = 'task';
 
-      const date = taskData['마감일'] || '';
+      const date = formatDateShort(taskData['마감일'] || '');
       const subject = taskData['과목'] || '';
       const content = taskData['범위'] || taskData['내용'] || '';
       const summary = [date, subject, content].filter(Boolean).join(' / ');
