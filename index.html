@@ -176,7 +176,6 @@
       label.textContent = field.label + ": ";
 
       let input;
-
       if (field.type === 'select') {
         input = document.createElement('select');
         field.options.forEach(opt => {
@@ -234,8 +233,6 @@
     container.innerHTML = '';
     if (!tasks) return;
 
-    console.log('렌더링 카테고리:', category);  // 디버깅용
-
     const taskEntries = Object.entries(tasks);
 
     taskEntries.sort(([idA, taskA], [idB, taskB]) => {
@@ -261,20 +258,15 @@
       const taskDiv = document.createElement('div');
       taskDiv.className = 'task';
 
-      Object.entries(taskData).forEach(([key, val]) => {
-        if (key === 'originalCategory' || val === '') return;
+      const date = taskData['마감일'] || '';
+      const subject = taskData['과목'] || '';
+      const content = taskData['범위'] || taskData['내용'] || '';
+      const summary = [date, subject, content].filter(Boolean).join(' / ');
 
-        if (key === '마감일') {
-          const dateLabel = document.createElement('span');
-          dateLabel.className = 'date-label';
-          dateLabel.textContent = val;
-          taskDiv.appendChild(dateLabel);
-        } else {
-          const span = document.createElement('span');
-          span.textContent = `${key}: ${val}`;
-          taskDiv.appendChild(span);
-        }
-      });
+      const summarySpan = document.createElement('span');
+      summarySpan.textContent = summary;
+      summarySpan.style.fontWeight = '500';
+      taskDiv.appendChild(summarySpan);
 
       const btnArea = document.createElement('div');
       btnArea.className = 'btn-area';
@@ -331,7 +323,6 @@
 
   function loadAllTasks(student) {
     const categories = ['숙제', '공부', '시험', '수행평가', 'completed', 'deleted'];
-
     categories.forEach(category => {
       const tasksRef = ref(db, `tasks/${student}/${category}`);
       onValue(tasksRef, snapshot => {
