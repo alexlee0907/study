@@ -163,7 +163,7 @@
     if (!isoDate) return '';
     const date = new Date(isoDate);
     if (isNaN(date)) return isoDate;
-    return date.toISOString().slice(2, 10); // 'yy-mm-dd'
+    return date.toISOString().slice(2, 10);
   }
 
   function saveTask(student, category, taskId, taskData) {
@@ -367,6 +367,7 @@
     });
   }
 
+  // 이벤트 등록
   document.querySelectorAll('.add-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const student = btn.dataset.student;
@@ -375,41 +376,33 @@
     });
   });
 
-// 접기/펼치기 버튼 기능
-document.querySelectorAll('.toggle-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const targetId = btn.dataset.target;
-    const container = document.querySelector(`#${targetId} .task-list`);
-    if (!container) return;
-
-    const isHidden = container.style.display === 'none';
-    container.style.display = isHidden ? 'block' : 'none';
-    btn.textContent = isHidden ? '닫기' : '열기';
+  document.querySelectorAll('.clear-deleted-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const student = btn.dataset.student;
+      if (confirm('삭제된 항목을 모두 비우시겠습니까?')) {
+        clearDeletedTasks(student);
+      }
+    });
   });
-});
 
-  
+  // 접기/펼치기 버튼 기능 (중복 등록 없이)
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const container = document.querySelector(`#${targetId} .task-list`);
+      const extra = document.querySelector(`#${targetId} .deleted-controls`);
+      if (!container) return;
+
+      const isHidden = container.style.display === 'none';
+      container.style.display = isHidden ? 'block' : 'none';
+      if (extra) extra.style.display = isHidden ? 'block' : 'none';
+      btn.textContent = isHidden ? '닫기' : '열기';
+    });
+  });
 
   loadAllTasks('JH');
-  
-document.querySelectorAll('.toggle-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const targetId = btn.dataset.target;
-    const container = document.querySelector(`#${targetId} .task-list`);
-    const extra = document.querySelector(`#${targetId} .deleted-controls`);
-    if (!container) return;
-
-    const isHidden = container.style.display === 'none';
-    container.style.display = isHidden ? 'block' : 'none';
-    if (extra) extra.style.display = isHidden ? 'block' : 'none';
-    btn.textContent = isHidden ? '닫기' : '열기';
-  });
-});
-  
-
-
-  
 </script>
+
 
 </body>
 </html>
