@@ -369,6 +369,21 @@
     });
   });
 
+// 접기/펼치기 버튼 기능
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    const container = document.querySelector(`#${targetId} .task-list`);
+    if (!container) return;
+
+    const isHidden = container.style.display === 'none';
+    container.style.display = isHidden ? 'block' : 'none';
+    btn.textContent = isHidden ? '닫기' : '열기';
+  });
+});
+
+  
+
   loadAllTasks('JH');
 </script>
 
