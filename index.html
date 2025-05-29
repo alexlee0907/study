@@ -96,24 +96,23 @@
     <div class="task-list"></div>
   </div>
 
-  <div class="category" id="수행평가-JH">
-    <h3>수행평가 <button class="add-btn" data-student="JH" data-category="수행평가">추가</button></h3>
-    <div class="task-list"></div>
-  </div>
-
-  <div class="category" id="completed-JH">
-    <h3>완료된 항목</h3>
-    <div class="task-list"></div>
-  </div>
-
-  <div class="category" id="deleted-JH">
-    <h3>
-      삭제된 항목
-      <button class="clear-deleted-btn" data-student="JH">비우기</button>
-    </h3>
-    <div class="task-list"></div>
-  </div>
+<div class="category" id="completed-JH">
+  <h3>
+    완료된 항목
+    <button class="toggle-btn" data-target="completed-JH">열기</button>
+  </h3>
+  <div class="task-list" style="display: none;"></div> <!-- 기본 접힘 -->
 </div>
+
+<div class="category" id="deleted-JH">
+  <h3>
+    삭제된 항목
+    <button class="toggle-btn" data-target="deleted-JH">열기</button>
+    <button class="clear-deleted-btn" data-student="JH">비우기</button>
+  </h3>
+  <div class="task-list" style="display: none;"></div> <!-- 기본 접힘 -->
+</div>
+
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
