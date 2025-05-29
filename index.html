@@ -254,8 +254,15 @@
     cancelBtn.textContent = '취소';
     cancelBtn.onclick = () => taskDiv.remove();
 
-    taskDiv.appendChild(saveBtn);
-    taskDiv.appendChild(cancelBtn);
+const btnArea = document.createElement('div');
+btnArea.style.display = 'flex';
+btnArea.style.gap = '10px';
+btnArea.style.marginTop = '10px';
+
+btnArea.appendChild(saveBtn);
+btnArea.appendChild(cancelBtn);
+
+taskDiv.appendChild(btnArea);
 
     document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
   }
