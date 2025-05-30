@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -31,9 +31,6 @@
       --deleted-bg: #f7f7f7;
     }
     body {
-      font-family: sans-serif;
-      margin: 20px;
-      background-color: #f4f4f4;
       font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
       margin: 0;
       background: var(--main-bg);
@@ -64,7 +61,6 @@
       --completed-bg: #2c3a2c;
       --deleted-bg: #23263a;
     }
-    /* 상단 고정 헤더 */
     .header-fixed {
       position: sticky;
       top: 0;
@@ -102,10 +98,6 @@
       background: #2940d3;
     }
     .student-section {
-      border: 1px solid #ccc;
-      padding: 20px;
-      margin-bottom: 30px;
-      background: white;
       max-width: 500px;
       margin: 0 auto 30px auto;
       border-radius: 22px;
@@ -115,7 +107,6 @@
       transition: background 0.3s, box-shadow 0.3s;
     }
     .category {
-      margin-top: 20px;
       margin-top: 28px;
       border-left: 7px solid var(--border);
       background: var(--category-bg);
@@ -141,7 +132,6 @@
     .task-list {
       min-height: 10px;
     }
-    /* 카드 애니메이션 */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px);}
       to { opacity: 1; transform: translateY(0);}
@@ -149,15 +139,9 @@
     .task {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 10px;
       gap: 12px;
       margin-bottom: 12px;
       align-items: center;
-      border: 1px solid #ddd;
-      padding: 8px;
-      border-radius: 4px;
-      background: #fafafa;
       border-radius: 14px;
       background: var(--card-bg);
       box-shadow: 0 2px 8px rgba(80,110,255,0.05);
@@ -180,26 +164,21 @@
     }
     .task label {
       margin-right: 6px;
-      min-width: 70px;
       min-width: 72px;
       font-weight: 500;
       color: var(--primary);
     }
     .task span {
-      margin-right: 10px;
       margin-right: 12px;
       font-size: 1.05em;
       color: var(--text);
     }
     .btn-area {
       display: flex;
-      gap: 6px;
       gap: 8px;
       min-width: 90px;
     }
     .btn-area button {
-      padding: 4px 8px;
-      font-size: 0.9em;
       padding: 5px 14px;
       font-size: 0.95em;
       border-radius: 8px;
@@ -217,7 +196,6 @@
       box-shadow: 0 6px 18px rgba(80,110,255,0.18);
     }
     input, select, button {
-      padding: 5px;
       padding: 6px;
       font-size: 1em;
       border-radius: 7px;
@@ -236,14 +214,11 @@
     }
     .date-label {
       display: inline-block;
-      padding: 3px 8px;
-      background-color: #d0eaff;
       padding: 4px 12px;
       background-color: #e0f3ff;
       border: 1.5px solid #3399ff;
       border-radius: 12px;
       font-weight: 600;
-      font-size: 0.9em;
       font-size: 0.95em;
       color: #005bbb;
       cursor: pointer;
@@ -273,56 +248,20 @@
         padding: 10px 6px 8px 6px;
       }
       .btn-area button {
-        margin-left: 0;
-        margin-top: 0;
         font-size: 0.95em;
         padding: 5px 10px;
       }
       .task label {
-        min-width: 55px;
         min-width: 54px;
       }
     }
   </style>
 </head>
 <body>
-
-<div class="student-section" id="student-JH">
-  <h2>JH</h2>
-
-  <div class="category" id="숙제-JH">
-    <h3>숙 <button class="add-btn" data-student="JH" data-category="숙제">추가</button></h3>
-    <div class="task-list"></div>
-  </div>
-
-  <div class="category" id="공부-JH">
-    <h3>공 <button class="add-btn" data-student="JH" data-category="공부">추가</button></h3>
-    <div class="task-list"></div>
-  </div>
-
-  <div class="category" id="시험-JH">
-    <h3>시 <button class="add-btn" data-student="JH" data-category="시험">추가</button></h3>
-    <div class="task-list"></div>
   <div class="header-fixed">
     <h2>JH</h2>
     <button class="dark-toggle-btn" id="darkToggleBtn">다크모드</button>
   </div>
-
-  <div class="category" id="completed-JH">
-    <h3>
-      완료
-      <button class="toggle-btn" data-target="completed-JH">열기</button>
-    </h3>
-    <div class="task-list" style="display: none;"></div>
-  </div>
-
-  <div class="category" id="deleted-JH">
-    <h3>
-      삭제
-      <button class="toggle-btn" data-target="deleted-JH">열기</button>
-    </h3>
-    <div class="deleted-controls" style="display: none;">
-      <button class="clear-deleted-btn" data-student="JH">비우기</button>
   <div class="student-section" id="student-JH">
     <div class="category" id="숙제-JH">
       <h3>숙 <button class="add-btn" data-student="JH" data-category="숙제">추가</button></h3>
@@ -353,10 +292,7 @@
       </div>
       <div class="task-list" style="display: none;"></div>
     </div>
-    <div class="task-list" style="display: none;"></div>
   </div>
-</div>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
   import { getDatabase, ref, set, remove, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
@@ -403,7 +339,6 @@
     darkBtn.textContent = document.body.classList.contains('dark') ? '라이트모드' : '다크모드';
     localStorage.setItem('darkmode', document.body.classList.contains('dark') ? '1' : '0');
   });
-  // 다크모드 상태 기억
   if (localStorage.getItem('darkmode') === '1') {
     document.body.classList.add('dark');
     darkBtn.textContent = '라이트모드';
@@ -439,7 +374,6 @@
       });
   }
 
-  // ‘비우기’ 버튼 이벤트 등록 (한 번만 남김!)
   document.querySelectorAll('.clear-deleted-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const student = btn.dataset.student;
@@ -469,12 +403,9 @@
           option.textContent = opt;
           input.appendChild(option);
         });
-      } else {
       } else if (field.type === 'text') {
         input = document.createElement('input');
-        input.type = field.type;
         input.type = 'text';
-        // placeholder 적용
         if (field.label === '과목') input.placeholder = '예: 수학';
         if (field.label === '범위') input.placeholder = '예: 1~10쪽';
         if (field.label === '내용') input.placeholder = '예: 과학 실험 보고서';
@@ -489,7 +420,6 @@
       inputs.push({ label: field.label, input });
     });
 
-    // 버튼 영역
     const btnArea = document.createElement('div');
     btnArea.className = 'btn-area';
 
@@ -531,9 +461,7 @@
     if (!deadline) return '';
     const today = new Date();
     const d = new Date(deadline);
-    // 오늘 날짜와 비교
     if (d.toDateString() === today.toDateString()) return 'deadline-today';
-    // 3일 이내 임박
     const diff = (d - today) / (1000 * 60 * 60 * 24);
     if (diff > 0 && diff <= 3) return 'deadline-soon';
     return '';
@@ -548,7 +476,6 @@
 
     Object.entries(tasks).forEach(([taskId, taskData]) => {
       const taskDiv = document.createElement('div');
-      taskDiv.className = 'task';
       let deadlineClass = '';
       if (['숙제', '공부', '시험'].includes(category)) {
         deadlineClass = getDeadlineClass(taskData['마감일']);
@@ -556,16 +483,13 @@
       if (deadlineClass) taskDiv.classList.add(deadlineClass);
       taskDiv.classList.add('task');
 
-      // 1. 텍스트를 span으로 감싸서 taskDiv에 추가
       const summarySpan = document.createElement('span');
       summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['범위'] || taskData['내용'] || ''} / ${taskData['마감일'] || ''}`;
       taskDiv.appendChild(summarySpan);
 
-      // 2. 버튼들을 담을 div 생성 (.btn-area)
       const btnArea = document.createElement('div');
       btnArea.className = 'btn-area';
 
-      // 3. 카테고리에 따른 버튼 생성
       if (category === 'completed' || category === 'deleted') {
         const restoreBtn = document.createElement('button');
         restoreBtn.textContent = '복구';
@@ -611,10 +535,7 @@
         btnArea.appendChild(deleteBtn);
       }
 
-      // 4. taskDiv에 btnArea 추가
       taskDiv.appendChild(btnArea);
-
-      // 5. container에 taskDiv 추가
       container.appendChild(taskDiv);
     });
   }
@@ -630,7 +551,6 @@
     });
   }
 
-  // ‘추가’ 버튼 이벤트
   document.querySelectorAll('.add-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const student = btn.dataset.student;
@@ -639,7 +559,6 @@
     });
   });
 
-  // 접기/펼치기 버튼 기능 (열기/닫기 토글 + ‘비우기’ 버튼 표시 제어)
   document.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.target;
@@ -650,14 +569,12 @@
       const isHidden = container.style.display === 'none';
 
       if (isHidden) {
-        // 열기 → 닫기 상태
         container.style.display = 'block';
         if (deletedControls) deletedControls.style.display = 'block';
         btn.textContent = '닫기';
       } else {
-        // 닫기 → 열기 상태
         container.style.display = 'none';
-        if (deletedControls) deletedControls.style.display = 'none';More actions
+        if (deletedControls) deletedControls.style.display = 'none';
         btn.textContent = '열기';
       }
     });
@@ -665,6 +582,5 @@
 
   loadAllTasks('JH');
 </script>
-
 </body>
 </html>
