@@ -236,6 +236,53 @@
     .clear-deleted-btn:hover {
       background: #b71c1c !important;
     }
+    /* 커스텀 confirm 팝업 */
+    .custom-confirm-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.35);
+      z-index: 9998;
+    }
+    .custom-confirm-box {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(80,110,255,0.18);
+      padding: 32px 28px 22px 28px;
+      text-align: center;
+      z-index: 9999;
+      min-width: 240px;
+    }
+    .custom-confirm-msg {
+      margin-bottom: 22px;
+      font-size: 1.1em;
+      color: var(--text);
+    }
+    .custom-confirm-btns {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+    }
+    .custom-confirm-btns button {
+      padding: 7px 22px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .custom-confirm-cancel {
+      background: #eee;
+      color: var(--text);
+    }
+    .custom-confirm-ok {
+      background: var(--primary);
+      color: #fff;
+    }
     @media (max-width: 600px) {
       .header-fixed h2 { font-size: 1.3em; margin-left: 10px;}
       .dark-toggle-btn { margin-right: 10px; padding: 7px 10px;}
@@ -253,6 +300,10 @@
       }
       .task label {
         min-width: 54px;
+      }
+      .custom-confirm-box {
+        min-width: 70vw;
+        padding: 18px 8vw 14px 8vw;
       }
     }
   </style>
@@ -296,6 +347,60 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
   import { getDatabase, ref, set, remove, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+  // 커스텀 confirm 함수
+  function customConfirm(message) {
+    return new Promise((resolve) => {
+      // 오버레이
+      const overlay = document.createElement('div');
+      overlay.className = 'custom-confirm-overlay';
+
+      // 팝업 박스
+      const box = document.createElement('div');
+      box.className = 'custom-confirm-box';
+
+      // 메시지
+      const msg = document.createElement('div');
+      msg.className = 'custom-confirm-msg';
+      msg.textContent = message;
+      box.appendChild(msg);
+
+      // 버튼 영역
+      const btnArea = document.createElement('div');
+      btnArea.className = 'custom-confirm-btns';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'custom-confirm-cancel';
+      cancelBtn.textContent = '취소';
+
+      const okBtn = document.createElement('button');
+      okBtn.className = 'custom-confirm-ok';
+      okBtn.textContent = '확인';
+
+      btnArea.appendChild(cancelBtn);
+      btnArea.appendChild(okBtn);
+      box.appendChild(btnArea);
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(box);
+
+      okBtn.onclick = () => {
+        document.body.removeChild(overlay);
+        document.body.removeChild(box);
+        resolve(true);
+      };
+      cancelBtn.onclick = () => {
+        document.body.removeChild(overlay);
+        document.body.removeChild(box);
+        resolve(false);
+      };
+      overlay.onclick = () => {
+        document.body.removeChild(overlay);
+        document.body.removeChild(box);
+        resolve(false);
+      };
+    });
+  }
 
   const firebaseConfig = {
     apiKey: "AIzaSyBuhnhDDgnZkNMfFo3_0EsGrJzezKbTpZs",
@@ -374,12 +479,15 @@
       });
   }
 
+  // customConfirm 사용으로 변경
   document.querySelectorAll('.clear-deleted-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const student = btn.dataset.student;
-      if (confirm('삭제된 항목을 모두 비우시겠습니까?')) {
-        clearDeletedTasks(student);
-      }
+      customConfirm('삭제된 항목을 모두 비우시겠습니까?').then(result => {
+        if (result) {
+          clearDeletedTasks(student);
+        }
+      });
     });
   });
 
