@@ -248,7 +248,6 @@
     .clear-deleted-btn:hover {
       background: #b71c1c !important;
     }
-    /* 요청사항 섹션 */
     .request-section {
       margin-top: 28px;
       border-left: 7px solid var(--primary);
@@ -297,6 +296,44 @@
     .send-btn:disabled {
       background: #ccc;
       cursor: not-allowed;
+    }
+    .custom-popup-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.35);
+      z-index: 9998;
+    }
+    .custom-popup-box {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(80,110,255,0.18);
+      padding: 32px 28px 22px 28px;
+      text-align: center;
+      z-index: 9999;
+      min-width: 240px;
+      color: var(--text);
+      font-size: 1.1em;
+    }
+    .custom-popup-btns {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .custom-popup-btns button {
+      padding: 7px 22px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      background: var(--primary);
+      color: #fff;
     }
     .custom-confirm-overlay {
       position: fixed;
@@ -363,6 +400,7 @@
       .task label {
         min-width: 54px;
       }
+      .custom-popup-box,
       .custom-confirm-box {
         min-width: 70vw;
         padding: 18px 8vw 14px 8vw;
@@ -474,51 +512,68 @@
   const TELEGRAM_BOT_TOKEN = '7760918691:AAErUKe2pQEZzHVzUwUQYneJwrM2YgzPGG4';
   const TELEGRAM_CHAT_ID = '1869276713';
 
-  // 텔레그램 메시지 전송 함수
+  // 커스텀 팝업 함수 (alert 대체)
+  function customPopup(message) {
+    return new Promise(resolve => {
+      const overlay = document.createElement('div');
+      overlay.className = 'custom-popup-overlay';
+      const box = document.createElement('div');
+      box.className = 'custom-popup-box';
+      box.textContent = message;
+      const btnArea = document.createElement('div');
+      btnArea.className = 'custom-popup-btns';
+      const okBtn = document.createElement('button');
+      okBtn.textContent = '확인';
+      okBtn.onclick = () => {
+        document.body.removeChild(overlay);
+        document.body.removeChild(box);
+        resolve();
+      };
+      btnArea.appendChild(okBtn);
+      box.appendChild(btnArea);
+      document.body.appendChild(overlay);
+      document.body.appendChild(box);
+    });
+  }
+
+  // 요청사항 전송 함수 (alert → customPopup)
   window.sendRequest = async function(student) {
     const textarea = document.getElementById(`request-${student}`);
     const message = textarea.value.trim();
-    
     if (!message) {
-      alert('요청사항을 입력해주세요.');
+      customPopup('요청사항을 입력해주세요.');
       return;
     }
-
     const sendBtn = textarea.parentElement.querySelector('.send-btn');
     sendBtn.disabled = true;
     sendBtn.textContent = '전송 중...';
-
     try {
       const telegramMessage = `📝 **${student} 학생 요청사항**\n\n${message}\n\n📅 ${new Date().toLocaleString('ko-KR')}`;
-      
       const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', },
         body: JSON.stringify({
           chat_id: TELEGRAM_CHAT_ID,
           text: telegramMessage,
           parse_mode: 'Markdown'
         })
       });
-
       if (response.ok) {
-        alert('요청사항이 전송되었습니다.');
+        await customPopup('요청사항이 전송되었습니다.');
         textarea.value = '';
       } else {
         throw new Error('전송 실패');
       }
     } catch (error) {
       console.error('텔레그램 전송 오류:', error);
-      alert('전송에 실패했습니다. 다시 시도해주세요.');
+      await customPopup('전송에 실패했습니다. 다시 시도해주세요.');
     } finally {
       sendBtn.disabled = false;
       sendBtn.textContent = '전송';
     }
   };
 
-  // 커스텀 confirm 함수
+  // 커스텀 confirm 함수 (기존과 동일)
   function customConfirm(message) {
     return new Promise((resolve) => {
       const overlay = document.createElement('div');
@@ -560,6 +615,7 @@
     });
   }
 
+  // Firebase 설정
   const firebaseConfig = {
     apiKey: "AIzaSyBuhnhDDgnZkNMfFo3_0EsGrJzezKbTpZs",
     authDomain: "study-fbdae.firebaseapp.com",
@@ -573,6 +629,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  // 카테고리별 입력 항목 정의 (주말보강 개선)
   const categoryFields = {
     '숙제': [
       { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
@@ -590,9 +647,9 @@
       { label: '마감일', type: 'date' }
     ],
     '주말보강': [
-      { label: '과목', type: 'text' },
-      { label: '내용', type: 'text' },
-      { label: '날짜', type: 'date' }
+      { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
+      { label: '날짜', type: 'date' },
+      { label: '시간', type: 'time' }
     ],
     '수행평가': [
       { label: '내용', type: 'text' },
@@ -604,12 +661,8 @@
   document.querySelectorAll('.student-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const student = btn.dataset.student;
-      
-      // 버튼 활성화 상태 변경
       document.querySelectorAll('.student-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      
-      // 섹션 표시/숨김
       document.querySelectorAll('.student-section').forEach(section => {
         section.classList.remove('active');
       });
@@ -647,7 +700,7 @@
     remove(deletedRef)
       .catch(err => {
         console.error(err);
-        alert('비우기 실패');
+        customPopup('비우기 실패');
       });
   }
 
@@ -689,6 +742,9 @@
       } else if (field.type === 'date') {
         input = document.createElement('input');
         input.type = 'date';
+      } else if (field.type === 'time') {
+        input = document.createElement('input');
+        input.type = 'time';
       }
       label.appendChild(input);
       taskDiv.appendChild(label);
@@ -704,7 +760,7 @@
         taskData[label] = input.value;
       });
       if (Object.values(taskData).some(val => !val)) {
-        alert('모든 항목을 입력해주세요.');
+        customPopup('모든 항목을 입력해주세요.');
         return;
       }
       const taskId = Date.now().toString();
@@ -712,7 +768,7 @@
         await saveTask(student, category, taskId, taskData);
         taskDiv.remove();
       } catch (e) {
-        alert('저장 실패');
+        customPopup('저장 실패');
         console.error(e);
       }
     };
@@ -785,7 +841,7 @@
 
       const summarySpan = document.createElement('span');
       if (category === '주말보강') {
-        summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['내용'] || ''} / ${taskData['날짜'] || ''}`;
+        summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['날짜'] || ''} / ${taskData['시간'] || ''}`;
       } else {
         summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['범위'] || taskData['내용'] || ''} / ${taskData['마감일'] || taskData['날짜'] || ''}`;
       }
@@ -799,7 +855,7 @@
         restoreBtn.textContent = '복구';
         restoreBtn.onclick = async () => {
           if (!taskData.originalCategory) {
-            alert('복구할 원래 카테고리 정보가 없습니다.');
+            customPopup('복구할 원래 카테고리 정보가 없습니다.');
             return;
           }
           const originalCategory = taskData.originalCategory;
@@ -808,7 +864,7 @@
           try {
             await moveTask(student, category, originalCategory, taskId, newTaskData);
           } catch (e) {
-            alert('복구 실패');
+            customPopup('복구 실패');
             console.error(e);
           }
         };
@@ -820,7 +876,7 @@
           try {
             await moveTask(student, category, 'completed', taskId, { ...taskData, originalCategory: category });
           } catch (e) {
-            alert('완료 처리 실패');
+            customPopup('완료 처리 실패');
             console.error(e);
           }
         };
@@ -832,7 +888,7 @@
           try {
             await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
           } catch (e) {
-            alert('삭제 처리 실패');
+            customPopup('삭제 처리 실패');
             console.error(e);
           }
         };
