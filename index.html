@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -7,27 +7,333 @@
   <!-- Pretendard Google Fonts -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <style>
-    /* ... (기존 스타일 동일, 생략 가능) ... */
-    /* 스타일 부분은 기존과 동일하므로 생략합니다. */
-    /* 필요하다면 요청해 주세요. */
+    :root {
+      --main-bg: linear-gradient(120deg, #e0e7ff 0%, #f4f4f4 100%);
+      --card-bg: #fff;
+      --category-bg: #f3f6ff;
+      --border: #e3e9ff;
+      --shadow: 0 6px 32px rgba(80,110,255,0.10);
+      --text: #222;
+      --primary: #506eff;
+      --accent1: #4a90e2;
+      --accent2: #f5a623;
+      --accent3: #d0021b;
+      --accent4: #7ed957;
+      --accent5: #888;
+      --deadline-soon-bg: #fff8e1;
+      --deadline-soon-border: #ffd54f;
+      --deadline-today-bg: #ffe0e0;
+      --deadline-today-border: #ff8a65;
+      --input-bg: #f9faff;
+      --input-border: #d0d8ff;  
+      --input-focus: #506eff;
+      --completed-bg: #f3ffe6;
+      --deleted-bg: #f7f7f7;
+    }
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      margin: 0;
+      background: var(--main-bg);
+      min-height: 100vh;
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      --main-bg: linear-gradient(120deg, #181c2b 0%, #23263a 100%);
+      --card-bg: #23263a;
+      --category-bg: #20243a;
+      --border: #2c3152;
+      --shadow: 0 6px 32px rgba(80,110,255,0.15);
+      --text: #e0e7ff;
+      --primary: #94aaff;
+      --accent1: #6ea4f7;
+      --accent2: #ffd54f;
+      --accent3: #ff8a65;
+      --accent4: #7ed957;
+      --accent5: #aaa;
+      --deadline-soon-bg: #3b3a2a;
+      --deadline-soon-border: #ffd54f;
+      --deadline-today-bg: #4a2a2a;
+      --deadline-today-border: #ff8a65;
+      --input-bg: #23263a;
+      --input-border: #2c3152;
+      --input-focus: #94aaff;
+      --completed-bg: #2c3a2c;
+      --deleted-bg: #23263a;
+    }
+    /* 상단 고정 헤더 */
+    .header-fixed {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--main-bg);
+      padding: 0;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 10px rgba(80,110,255,0.09);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+    }
+    .header-fixed h2 {
+      margin: 0 0 0 24px;
+      color: var(--primary);
+      letter-spacing: 2px;
+      font-size: 2em;
+      font-weight: 800;
+      text-align: left;
+    }
+    .dark-toggle-btn {
+      margin-right: 24px;
+      padding: 8px 18px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .dark-toggle-btn:hover {
+      background: #2940d3;
+    }
+    .student-section {
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin-bottom: 30px;
+      background: white;
+      max-width: 500px;
+      margin: 0 auto 30px auto;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      background: var(--card-bg);
+      padding: 18px 24px 18px 24px;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .category {
+      margin-top: 20px;
+      margin-top: 28px;
+      border-left: 7px solid var(--border);
+      background: var(--category-bg);
+      border-radius: 12px;
+      padding: 12px 12px 6px 18px;
+      box-shadow: 0 2px 8px rgba(80,110,255,0.03);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .category[id^="숙제"] { border-left-color: var(--accent1);}
+    .category[id^="공부"] { border-left-color: var(--accent2);}
+    .category[id^="시험"] { border-left-color: var(--accent3);}
+    .category[id^="completed"] { border-left-color: var(--accent4);}
+    .category[id^="deleted"] { border-left-color: var(--accent5);}
+    .category h3 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.1em;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .task-list {
+      min-height: 10px;
+    }
+    /* 카드 애니메이션 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .task {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: center;
+      border: 1px solid #ddd;
+      padding: 8px;
+      border-radius: 4px;
+      background: #fafafa;
+      border-radius: 14px;
+      background: var(--card-bg);
+      box-shadow: 0 2px 8px rgba(80,110,255,0.05);
+      border: 1.5px solid var(--border);
+      padding: 14px 14px 10px 14px;
+      transition: box-shadow 0.2s, background 0.2s, border 0.2s;
+      animation: fadeIn 0.3s;
+    }
+    .task:hover {
+      box-shadow: 0 8px 24px rgba(80,110,255,0.18);
+      transform: scale(1.025);
+    }
+    .task.deadline-soon {
+      background: var(--deadline-soon-bg);
+      border-color: var(--deadline-soon-border);
+    }
+    .task.deadline-today {
+      background: var(--deadline-today-bg);
+      border-color: var(--deadline-today-border);
+    }
+    .task label {
+      margin-right: 6px;
+      min-width: 70px;
+      min-width: 72px;
+      font-weight: 500;
+      color: var(--primary);
+    }
+    .task span {
+      margin-right: 10px;
+      margin-right: 12px;
+      font-size: 1.05em;
+      color: var(--text);
+    }
+    .btn-area {
+      display: flex;
+      gap: 6px;
+      gap: 8px;
+      min-width: 90px;
+    }
+    .btn-area button {
+      padding: 4px 8px;
+      font-size: 0.9em;
+      padding: 5px 14px;
+      font-size: 0.95em;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(80,110,255,0.08);
+      transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+      cursor: pointer;
+    }
+    .btn-area button:hover {
+      background: #2940d3;
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 6px 18px rgba(80,110,255,0.18);
+    }
+    input, select, button {
+      padding: 5px;
+      padding: 6px;
+      font-size: 1em;
+      border-radius: 7px;
+      border: 1.2px solid var(--input-border);
+      background: var(--input-bg);
+      outline: none;
+      transition: border 0.15s, background 0.2s;
+    }
+    input:focus, select:focus {
+      border: 1.5px solid var(--input-focus);
+      background: #fff;
+    }
+    input[type="text"].small-input {
+      width: 90px;
+      font-size: 0.85em;
+    }
+    .date-label {
+      display: inline-block;
+      padding: 3px 8px;
+      background-color: #d0eaff;
+      padding: 4px 12px;
+      background-color: #e0f3ff;
+      border: 1.5px solid #3399ff;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9em;
+      font-size: 0.95em;
+      color: #005bbb;
+      cursor: pointer;
+      min-width: 75px;
+      text-align: center;
+      margin-left: 4px;
+    }
+    .clear-deleted-btn {
+      background: #f44336 !important;
+      color: #fff !important;
+      font-weight: 700 !important;
+      border: none !important;
+      box-shadow: 0 2px 8px rgba(244,67,54,0.13) !important;
+    }
+    .clear-deleted-btn:hover {
+      background: #b71c1c !important;
+    }
+    @media (max-width: 600px) {
+      .header-fixed h2 { font-size: 1.3em; margin-left: 10px;}
+      .dark-toggle-btn { margin-right: 10px; padding: 7px 10px;}
+      .student-section {
+        padding: 14px 4vw 6px 4vw;
+        border-radius: 10px;
+      }
+      .task {
+        gap: 8px;
+        padding: 10px 6px 8px 6px;
+      }
+      .btn-area button {
+        margin-left: 0;
+        margin-top: 0;
+        font-size: 0.95em;
+        padding: 5px 10px;
+      }
+      .task label {
+        min-width: 55px;
+        min-width: 54px;
+      }
+    }
   </style>
 </head>
 <body>
+
+<div class="student-section" id="student-JH">
+  <h2>JH</h2>
+
+  <div class="category" id="숙제-JH">
+    <h3>숙 <button class="add-btn" data-student="JH" data-category="숙제">추가</button></h3>
+    <div class="task-list"></div>
+  </div>
+
+  <div class="category" id="공부-JH">
+    <h3>공 <button class="add-btn" data-student="JH" data-category="공부">추가</button></h3>
+    <div class="task-list"></div>
+  </div>
+
+  <div class="category" id="시험-JH">
+    <h3>시 <button class="add-btn" data-student="JH" data-category="시험">추가</button></h3>
+    <div class="task-list"></div>
   <div class="header-fixed">
     <h2>JH</h2>
     <button class="dark-toggle-btn" id="darkToggleBtn">다크모드</button>
   </div>
+
+  <div class="category" id="completed-JH">
+    <h3>
+      완료
+      <button class="toggle-btn" data-target="completed-JH">열기</button>
+    </h3>
+    <div class="task-list" style="display: none;"></div>
+  </div>
+
+  <div class="category" id="deleted-JH">
+    <h3>
+      삭제
+      <button class="toggle-btn" data-target="deleted-JH">열기</button>
+    </h3>
+    <div class="deleted-controls" style="display: none;">
+      <button class="clear-deleted-btn" data-student="JH">비우기</button>
   <div class="student-section" id="student-JH">
     <div class="category" id="숙제-JH">
-      <h3>숙제 <button class="add-btn" data-student="JH" data-category="숙제">추가</button></h3>
+      <h3>숙 <button class="add-btn" data-student="JH" data-category="숙제">추가</button></h3>
       <div class="task-list"></div>
     </div>
     <div class="category" id="공부-JH">
-      <h3>공부 <button class="add-btn" data-student="JH" data-category="공부">추가</button></h3>
+      <h3>공 <button class="add-btn" data-student="JH" data-category="공부">추가</button></h3>
       <div class="task-list"></div>
     </div>
-    <div class="category" id="시험수행-JH">
-      <h3>시험/수행평가 <button class="add-btn" data-student="JH" data-category="시험수행">추가</button></h3>
+    <div class="category" id="시험-JH">
+      <h3>시 <button class="add-btn" data-student="JH" data-category="시험">추가</button></h3>
       <div class="task-list"></div>
     </div>
     <div class="category" id="completed-JH">
@@ -47,7 +353,10 @@
       </div>
       <div class="task-list" style="display: none;"></div>
     </div>
+    <div class="task-list" style="display: none;"></div>
   </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
   import { getDatabase, ref, set, remove, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
@@ -65,20 +374,24 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // 입력폼 정의
   const categoryFields = {
     '숙제': [
       { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
       { label: '범위', type: 'text' },
       { label: '마감일', type: 'date' }
     ],
-    '공부': [ // 숙제와 동일하게
-      { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
+    '공부': [
+      { label: '과목', type: 'text' },
       { label: '범위', type: 'text' },
       { label: '마감일', type: 'date' }
     ],
-    '시험수행': [
-      { label: '과제', type: 'text' },
+    '시험': [
+      { label: '과목', type: 'text' },
+      { label: '범위', type: 'text' },
+      { label: '마감일', type: 'date' }
+    ],
+    '수행평가': [
+      { label: '내용', type: 'text' },
       { label: '마감일', type: 'date' }
     ]
   };
@@ -90,6 +403,7 @@
     darkBtn.textContent = document.body.classList.contains('dark') ? '라이트모드' : '다크모드';
     localStorage.setItem('darkmode', document.body.classList.contains('dark') ? '1' : '0');
   });
+  // 다크모드 상태 기억
   if (localStorage.getItem('darkmode') === '1') {
     document.body.classList.add('dark');
     darkBtn.textContent = '라이트모드';
@@ -125,6 +439,7 @@
       });
   }
 
+  // ‘비우기’ 버튼 이벤트 등록 (한 번만 남김!)
   document.querySelectorAll('.clear-deleted-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const student = btn.dataset.student;
@@ -154,13 +469,15 @@
           option.textContent = opt;
           input.appendChild(option);
         });
+      } else {
       } else if (field.type === 'text') {
         input = document.createElement('input');
+        input.type = field.type;
         input.type = 'text';
         // placeholder 적용
         if (field.label === '과목') input.placeholder = '예: 수학';
         if (field.label === '범위') input.placeholder = '예: 1~10쪽';
-        if (field.label === '과제') input.placeholder = '예: 과학 실험 보고서';
+        if (field.label === '내용') input.placeholder = '예: 과학 실험 보고서';
       } else if (field.type === 'date') {
         input = document.createElement('input');
         input.type = 'date';
@@ -214,7 +531,9 @@
     if (!deadline) return '';
     const today = new Date();
     const d = new Date(deadline);
+    // 오늘 날짜와 비교
     if (d.toDateString() === today.toDateString()) return 'deadline-today';
+    // 3일 이내 임박
     const diff = (d - today) / (1000 * 60 * 60 * 24);
     if (diff > 0 && diff <= 3) return 'deadline-soon';
     return '';
@@ -229,32 +548,24 @@
 
     Object.entries(tasks).forEach(([taskId, taskData]) => {
       const taskDiv = document.createElement('div');
+      taskDiv.className = 'task';
       let deadlineClass = '';
-      if (['숙제', '공부', '시험수행'].includes(category)) {
+      if (['숙제', '공부', '시험'].includes(category)) {
         deadlineClass = getDeadlineClass(taskData['마감일']);
       }
       if (deadlineClass) taskDiv.classList.add(deadlineClass);
       taskDiv.classList.add('task');
 
-      // 텍스트 요약
+      // 1. 텍스트를 span으로 감싸서 taskDiv에 추가
       const summarySpan = document.createElement('span');
-      if (category === '숙제' || category === '공부') {
-        summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['범위'] || ''} / ${taskData['마감일'] || ''}`;
-      } else if (category === '시험수행') {
-        summarySpan.textContent = `${taskData['과제'] || ''} / ${taskData['마감일'] || ''}`;
-      } else {
-        // completed, deleted
-        summarySpan.textContent = (taskData['과목'] ? `${taskData['과목']} / ` : '')
-          + (taskData['범위'] ? `${taskData['범위']} / ` : '')
-          + (taskData['과제'] ? `${taskData['과제']} / ` : '')
-          + (taskData['마감일'] || '');
-      }
+      summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['범위'] || taskData['내용'] || ''} / ${taskData['마감일'] || ''}`;
       taskDiv.appendChild(summarySpan);
 
-      // 버튼
+      // 2. 버튼들을 담을 div 생성 (.btn-area)
       const btnArea = document.createElement('div');
       btnArea.className = 'btn-area';
 
+      // 3. 카테고리에 따른 버튼 생성
       if (category === 'completed' || category === 'deleted') {
         const restoreBtn = document.createElement('button');
         restoreBtn.textContent = '복구';
@@ -300,13 +611,16 @@
         btnArea.appendChild(deleteBtn);
       }
 
+      // 4. taskDiv에 btnArea 추가
       taskDiv.appendChild(btnArea);
+
+      // 5. container에 taskDiv 추가
       container.appendChild(taskDiv);
     });
   }
 
   function loadAllTasks(student) {
-    const categories = ['숙제', '공부', '시험수행', 'completed', 'deleted'];
+    const categories = ['숙제', '공부', '시험', '수행평가', 'completed', 'deleted'];
     categories.forEach(category => {
       const tasksRef = ref(db, `tasks/${student}/${category}`);
       onValue(tasksRef, snapshot => {
@@ -316,6 +630,7 @@
     });
   }
 
+  // ‘추가’ 버튼 이벤트
   document.querySelectorAll('.add-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const student = btn.dataset.student;
@@ -324,6 +639,7 @@
     });
   });
 
+  // 접기/펼치기 버튼 기능 (열기/닫기 토글 + ‘비우기’ 버튼 표시 제어)
   document.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.target;
@@ -334,12 +650,14 @@
       const isHidden = container.style.display === 'none';
 
       if (isHidden) {
+        // 열기 → 닫기 상태
         container.style.display = 'block';
         if (deletedControls) deletedControls.style.display = 'block';
         btn.textContent = '닫기';
       } else {
+        // 닫기 → 열기 상태
         container.style.display = 'none';
-        if (deletedControls) deletedControls.style.display = 'none';
+        if (deletedControls) deletedControls.style.display = 'none';More actions
         btn.textContent = '열기';
       }
     });
@@ -347,5 +665,6 @@
 
   loadAllTasks('JH');
 </script>
+
 </body>
 </html>
