@@ -25,7 +25,6 @@
       align-items: center;
     }
     .task {
-      /* 핵심: 한 줄에 입력폼+버튼 나오도록 flex row 유지, 공간 부족하면 wrap */
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
@@ -75,9 +74,7 @@
       text-align: center;
     }
     @media (max-width: 600px) {
-      /* flex-direction: column 제거! */
       .task {
-        /* flex-direction: row; 기본값이므로 생략 */
         gap: 8px;
       }
       .btn-area button {
@@ -93,7 +90,7 @@
 <body>
 
 <div class="student-section" id="student-JH">
-  <h2>H</h2>
+  <h2>JH</h2>
 
   <div class="category" id="숙제-JH">
     <h3>숙 <button class="add-btn" data-student="JH" data-category="숙제">추가</button></h3>
@@ -199,7 +196,7 @@
       });
   }
 
-  // ‘비우기’ 버튼 이벤트 등록
+  // ‘비우기’ 버튼 이벤트 등록 (한 번만 남김!)
   document.querySelectorAll('.clear-deleted-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const student = btn.dataset.student;
@@ -216,8 +213,6 @@
     const taskData = {};
     const inputs = [];
 
-    // 입력폼과 버튼을 한 줄로 묶는 래퍼
-    // (실제로 .task가 이미 flex row이므로, label과 btn-area만 배치하면 됨)
     categoryFields[category].forEach(field => {
       const label = document.createElement('label');
       label.textContent = field.label + ": ";
@@ -370,16 +365,6 @@
       const student = btn.dataset.student;
       const category = btn.dataset.category;
       addTask(student, category);
-    });
-  });
-
-  // ‘비우기’ 버튼 이벤트 (중복 등록 방지 위해 별도)
-  document.querySelectorAll('.clear-deleted-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const student = btn.dataset.student;
-      if (confirm('삭제된 항목을 모두 비우시겠습니까?')) {
-        clearDeletedTasks(student);
-      }
     });
   });
 
