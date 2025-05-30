@@ -472,7 +472,7 @@
   function clearDeletedTasks(student) {
     const deletedRef = ref(db, `tasks/${student}/deleted`);
     remove(deletedRef)
-      .then(() => alert('삭제된 항목이 모두 비워졌습니다.'))
+    
       .catch(err => {
         console.error(err);
         alert('비우기 실패');
