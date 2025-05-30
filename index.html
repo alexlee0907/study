@@ -25,6 +25,7 @@
       align-items: center;
     }
     .task {
+      /* 핵심: 한 줄에 입력폼+버튼 나오도록 flex row 유지, 공간 부족하면 wrap */
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
@@ -35,11 +36,19 @@
       border-radius: 4px;
       background: #fafafa;
     }
+    .task label {
+      margin-right: 6px;
+      min-width: 70px;
+    }
     .task span {
       margin-right: 10px;
     }
+    .btn-area {
+      display: flex;
+      gap: 6px;
+      min-width: 90px;
+    }
     .btn-area button {
-      margin-left: 6px;
       padding: 4px 8px;
       font-size: 0.9em;
       cursor: pointer;
@@ -66,12 +75,17 @@
       text-align: center;
     }
     @media (max-width: 600px) {
+      /* flex-direction: column 제거! */
       .task {
-        flex-direction: column;
+        /* flex-direction: row; 기본값이므로 생략 */
+        gap: 8px;
       }
       .btn-area button {
         margin-left: 0;
-        margin-top: 6px;
+        margin-top: 0;
+      }
+      .task label {
+        min-width: 55px;
       }
     }
   </style>
@@ -101,7 +115,7 @@
       완료
       <button class="toggle-btn" data-target="completed-JH">열기</button>
     </h3>
-    <div class="task-list" style="display: none;"></div> <!-- 기본 접힘 -->
+    <div class="task-list" style="display: none;"></div>
   </div>
 
   <div class="category" id="deleted-JH">
@@ -109,12 +123,9 @@
       삭제
       <button class="toggle-btn" data-target="deleted-JH">열기</button>
     </h3>
-
-    <!-- 비우기 버튼 위치 : 닫기 버튼 바로 아래 -->
     <div class="deleted-controls" style="display: none;">
       <button class="clear-deleted-btn" data-student="JH">비우기</button>
     </div>
-
     <div class="task-list" style="display: none;"></div>
   </div>
 </div>
@@ -205,6 +216,8 @@
     const taskData = {};
     const inputs = [];
 
+    // 입력폼과 버튼을 한 줄로 묶는 래퍼
+    // (실제로 .task가 이미 flex row이므로, label과 btn-area만 배치하면 됨)
     categoryFields[category].forEach(field => {
       const label = document.createElement('label');
       label.textContent = field.label + ": ";
@@ -227,6 +240,10 @@
       taskDiv.appendChild(label);
       inputs.push({ label: field.label, input });
     });
+
+    // 버튼 영역
+    const btnArea = document.createElement('div');
+    btnArea.className = 'btn-area';
 
     const saveBtn = document.createElement('button');
     saveBtn.textContent = '입력';
@@ -254,93 +271,87 @@
     cancelBtn.textContent = '취소';
     cancelBtn.onclick = () => taskDiv.remove();
 
-const btnArea = document.createElement('div');
-btnArea.style.display = 'flex';
-btnArea.style.gap = '10px';
-btnArea.style.marginTop = '10px';
+    btnArea.appendChild(saveBtn);
+    btnArea.appendChild(cancelBtn);
 
-btnArea.appendChild(saveBtn);
-btnArea.appendChild(cancelBtn);
-
-taskDiv.appendChild(btnArea);
+    taskDiv.appendChild(btnArea);
 
     document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
   }
 
   function renderTasks(student, category, tasks) {
-  const container = document.querySelector(`#${category}-${student} .task-list`);
-  if (!container) return;
+    const container = document.querySelector(`#${category}-${student} .task-list`);
+    if (!container) return;
 
-  container.innerHTML = '';
-  if (!tasks) return;
+    container.innerHTML = '';
+    if (!tasks) return;
 
-  Object.entries(tasks).forEach(([taskId, taskData]) => {
-    const taskDiv = document.createElement('div');
-    taskDiv.className = 'task';
+    Object.entries(tasks).forEach(([taskId, taskData]) => {
+      const taskDiv = document.createElement('div');
+      taskDiv.className = 'task';
 
-    // 1. 텍스트를 span으로 감싸서 taskDiv에 추가
-    const summarySpan = document.createElement('span');
-    summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['범위'] || taskData['내용'] || ''} / ${taskData['마감일'] || ''}`;
-    taskDiv.appendChild(summarySpan);
+      // 1. 텍스트를 span으로 감싸서 taskDiv에 추가
+      const summarySpan = document.createElement('span');
+      summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['범위'] || taskData['내용'] || ''} / ${taskData['마감일'] || ''}`;
+      taskDiv.appendChild(summarySpan);
 
-    // 2. 버튼들을 담을 div 생성 (.btn-area)
-    const btnArea = document.createElement('div');
-    btnArea.className = 'btn-area';
+      // 2. 버튼들을 담을 div 생성 (.btn-area)
+      const btnArea = document.createElement('div');
+      btnArea.className = 'btn-area';
 
-    // 3. 카테고리에 따른 버튼 생성
-    if (category === 'completed' || category === 'deleted') {
-      const restoreBtn = document.createElement('button');
-      restoreBtn.textContent = '복구';
-      restoreBtn.onclick = async () => {
-        if (!taskData.originalCategory) {
-          alert('복구할 원래 카테고리 정보가 없습니다.');
-          return;
-        }
-        const originalCategory = taskData.originalCategory;
-        const newTaskData = { ...taskData };
-        delete newTaskData.originalCategory;
-        try {
-          await moveTask(student, category, originalCategory, taskId, newTaskData);
-        } catch (e) {
-          alert('복구 실패');
-          console.error(e);
-        }
-      };
-      btnArea.appendChild(restoreBtn);
-    } else {
-      const completeBtn = document.createElement('button');
-      completeBtn.textContent = '완료';
-      completeBtn.onclick = async () => {
-        try {
-          await moveTask(student, category, 'completed', taskId, { ...taskData, originalCategory: category });
-        } catch (e) {
-          alert('완료 처리 실패');
-          console.error(e);
-        }
-      };
-      btnArea.appendChild(completeBtn);
+      // 3. 카테고리에 따른 버튼 생성
+      if (category === 'completed' || category === 'deleted') {
+        const restoreBtn = document.createElement('button');
+        restoreBtn.textContent = '복구';
+        restoreBtn.onclick = async () => {
+          if (!taskData.originalCategory) {
+            alert('복구할 원래 카테고리 정보가 없습니다.');
+            return;
+          }
+          const originalCategory = taskData.originalCategory;
+          const newTaskData = { ...taskData };
+          delete newTaskData.originalCategory;
+          try {
+            await moveTask(student, category, originalCategory, taskId, newTaskData);
+          } catch (e) {
+            alert('복구 실패');
+            console.error(e);
+          }
+        };
+        btnArea.appendChild(restoreBtn);
+      } else {
+        const completeBtn = document.createElement('button');
+        completeBtn.textContent = '완료';
+        completeBtn.onclick = async () => {
+          try {
+            await moveTask(student, category, 'completed', taskId, { ...taskData, originalCategory: category });
+          } catch (e) {
+            alert('완료 처리 실패');
+            console.error(e);
+          }
+        };
+        btnArea.appendChild(completeBtn);
 
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = '삭제';
-      deleteBtn.onclick = async () => {
-        try {
-          await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
-        } catch (e) {
-          alert('삭제 처리 실패');
-          console.error(e);
-        }
-      };
-      btnArea.appendChild(deleteBtn);
-    }
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '삭제';
+        deleteBtn.onclick = async () => {
+          try {
+            await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
+          } catch (e) {
+            alert('삭제 처리 실패');
+            console.error(e);
+          }
+        };
+        btnArea.appendChild(deleteBtn);
+      }
 
-    // 4. taskDiv에 btnArea 추가
-    taskDiv.appendChild(btnArea);
+      // 4. taskDiv에 btnArea 추가
+      taskDiv.appendChild(btnArea);
 
-    // 5. container에 taskDiv 추가
-    container.appendChild(taskDiv);
-  });
-}
-
+      // 5. container에 taskDiv 추가
+      container.appendChild(taskDiv);
+    });
+  }
 
   function loadAllTasks(student) {
     const categories = ['숙제', '공부', '시험', '수행평가', 'completed', 'deleted'];
