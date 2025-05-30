@@ -268,100 +268,79 @@ taskDiv.appendChild(btnArea);
   }
 
   function renderTasks(student, category, tasks) {
-    const container = document.querySelector(`#${category}-${student} .task-list`);
-    if (!container) return;
+  const container = document.querySelector(`#${category}-${student} .task-list`);
+  if (!container) return;
 
-    container.innerHTML = '';
-    if (!tasks) return;
+  container.innerHTML = '';
+  if (!tasks) return;
 
-    const taskEntries = Object.entries(tasks);
+  Object.entries(tasks).forEach(([taskId, taskData]) => {
+    const taskDiv = document.createElement('div');
+    taskDiv.className = 'task';
 
-    taskEntries.sort(([idA, taskA], [idB, taskB]) => {
-      const subjectA = (taskA['과목'] || '').toLowerCase();
-      const subjectB = (taskB['과목'] || '').toLowerCase();
-      if (subjectA < subjectB) return -1;
-      if (subjectA > subjectB) return 1;
+    // 1. 텍스트를 span으로 감싸서 taskDiv에 추가
+    const summarySpan = document.createElement('span');
+    summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['범위'] || taskData['내용'] || ''} / ${taskData['마감일'] || ''}`;
+    taskDiv.appendChild(summarySpan);
 
-      const contentA = (taskA['내용'] || taskA['범위'] || '').toLowerCase();
-      const contentB = (taskB['내용'] || taskB['범위'] || '').toLowerCase();
-      if (contentA < contentB) return -1;
-      if (contentA > contentB) return 1;
+    // 2. 버튼들을 담을 div 생성 (.btn-area)
+    const btnArea = document.createElement('div');
+    btnArea.className = 'btn-area';
 
-      const dateA = taskA['마감일'] || '';
-      const dateB = taskB['마감일'] || '';
-      if (dateA < dateB) return -1;
-      if (dateA > dateB) return 1;
+    // 3. 카테고리에 따른 버튼 생성
+    if (category === 'completed' || category === 'deleted') {
+      const restoreBtn = document.createElement('button');
+      restoreBtn.textContent = '복구';
+      restoreBtn.onclick = async () => {
+        if (!taskData.originalCategory) {
+          alert('복구할 원래 카테고리 정보가 없습니다.');
+          return;
+        }
+        const originalCategory = taskData.originalCategory;
+        const newTaskData = { ...taskData };
+        delete newTaskData.originalCategory;
+        try {
+          await moveTask(student, category, originalCategory, taskId, newTaskData);
+        } catch (e) {
+          alert('복구 실패');
+          console.error(e);
+        }
+      };
+      btnArea.appendChild(restoreBtn);
+    } else {
+      const completeBtn = document.createElement('button');
+      completeBtn.textContent = '완료';
+      completeBtn.onclick = async () => {
+        try {
+          await moveTask(student, category, 'completed', taskId, { ...taskData, originalCategory: category });
+        } catch (e) {
+          alert('완료 처리 실패');
+          console.error(e);
+        }
+      };
+      btnArea.appendChild(completeBtn);
 
-      return 0;
-    });
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '삭제';
+      deleteBtn.onclick = async () => {
+        try {
+          await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
+        } catch (e) {
+          alert('삭제 처리 실패');
+          console.error(e);
+        }
+      };
+      btnArea.appendChild(deleteBtn);
+    }
 
-    taskEntries.forEach(([taskId, taskData]) => {
-      const taskDiv = document.createElement('div');
-      taskDiv.className = 'task';
+    // 4. taskDiv에 btnArea 추가
+    taskDiv.appendChild(btnArea);
 
-      const date = formatDateShort(taskData['마감일'] || '');
-      const subject = taskData['과목'] || '';
-      const content = taskData['범위'] || taskData['내용'] || '';
-      const summary = [date, subject, content].filter(Boolean).join(' / ');
+    // 5. container에 taskDiv 추가
+    container.appendChild(taskDiv);
+  });
+}
 
-      const summarySpan = document.createElement('span');
-      summarySpan.textContent = summary;
-      summarySpan.style.fontWeight = '500';
-      summarySpan.style.flexGrow = '1';
-      taskDiv.appendChild(summarySpan);
-
-      const btnArea = document.createElement('div');
-      btnArea.className = 'btn-area';
-
-      if (['completed', 'deleted'].includes(category.toLowerCase())) {
-        const restoreBtn = document.createElement('button');
-        restoreBtn.textContent = '복구';
-        restoreBtn.onclick = async () => {
-          if (!taskData.originalCategory) {
-            alert('복구할 원래 카테고리 정보가 없습니다.');
-            return;
-          }
-          const originalCategory = taskData.originalCategory;
-          const newTaskData = { ...taskData };
-          delete newTaskData.originalCategory;
-          try {
-            await moveTask(student, category, originalCategory, taskId, newTaskData);
-          } catch (e) {
-            alert('복구 실패');
-            console.error(e);
-          }
-        };
-        btnArea.appendChild(restoreBtn);
-      } else {
-        const completeBtn = document.createElement('button');
-        completeBtn.textContent = '완료';
-        completeBtn.onclick = async () => {
-          try {
-            await moveTask(student, category, 'completed', taskId, { ...taskData, originalCategory: category });
-          } catch (e) {
-            alert('완료 처리 실패');
-            console.error(e);
-          }
-        };
-        btnArea.appendChild(completeBtn);
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = '삭제';
-        deleteBtn.onclick = async () => {
-          try {
-            await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
-          } catch (e) {
-            alert('삭제 처리 실패');
-            console.error(e);
-          }
-        };
-        btnArea.appendChild(deleteBtn);
-      }
-
-      taskDiv.appendChild(btnArea);
-      container.appendChild(taskDiv);
-    });
-  }
 
   function loadAllTasks(student) {
     const categories = ['숙제', '공부', '시험', '수행평가', 'completed', 'deleted'];
