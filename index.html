@@ -29,6 +29,8 @@
       --input-focus: #506eff;
       --completed-bg: #f3ffe6;
       --deleted-bg: #f7f7f7;
+      --disabled-bg: #ccc;
+      --disabled-text: #888;
     }
     body {
       font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
@@ -61,6 +63,8 @@
       --input-focus: #94aaff;
       --completed-bg: #2c3a2c;
       --deleted-bg: #23263a;
+      --disabled-bg: #555;
+      --disabled-text: #aaa;
     }
     .header-fixed {
       position: sticky;
@@ -225,6 +229,21 @@
       transform: translateY(-2px) scale(1.04);
       box-shadow: 0 6px 18px rgba(80,110,255,0.18);
     }
+    .btn-area button.delete-btn {
+      background: #f44336 !important;
+      box-shadow: 0 2px 6px rgba(244,67,54,0.13) !important;
+    }
+    .btn-area button.delete-btn:hover {
+      background: #b71c1c !important;
+      box-shadow: 0 6px 18px rgba(244,67,54,0.18) !important;
+    }
+    .btn-area button:disabled {
+      background: var(--disabled-bg);
+      color: var(--disabled-text);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
     input, select, button {
       padding: 6px;
       font-size: 1em;
@@ -237,16 +256,6 @@
     input:focus, select:focus {
       border: 1.5px solid var(--input-focus);
       background: #fff;
-    }
-    .clear-deleted-btn {
-      background: #f44336 !important;
-      color: #fff !important;
-      font-weight: 700 !important;
-      border: none !important;
-      box-shadow: 0 2px 8px rgba(244,67,54,0.13) !important;
-    }
-    .clear-deleted-btn:hover {
-      background: #b71c1c !important;
     }
     .request-section {
       margin-top: 28px;
@@ -449,9 +458,6 @@
         <span>삭제</span>
         <button class="toggle-btn" data-target="deleted-JH">열기</button>
       </h3>
-      <div class="deleted-controls" style="display: none;">
-        <button class="clear-deleted-btn" data-student="JH">비우기</button>
-      </div>
       <div class="task-list" style="display: none;"></div>
     </div>
     <div class="request-section">
@@ -490,9 +496,6 @@
         <span>삭제</span>
         <button class="toggle-btn" data-target="deleted-HJ">열기</button>
       </h3>
-      <div class="deleted-controls" style="display: none;">
-        <button class="clear-deleted-btn" data-student="HJ">비우기</button>
-      </div>
       <div class="task-list" style="display: none;"></div>
     </div>
     <div class="request-section">
@@ -693,26 +696,6 @@
     await deleteTask(student, fromCategory, taskId);
   }
 
-  function clearDeletedTasks(student) {
-    const deletedRef = ref(db, `tasks/${student}/deleted`);
-    remove(deletedRef)
-      .catch(err => {
-        console.error(err);
-        customPopup('비우기 실패');
-      });
-  }
-
-  document.querySelectorAll('.clear-deleted-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const student = btn.dataset.student;
-      customConfirm('삭제된 항목을 모두 비우시겠습니까?').then(result => {
-        if (result) {
-          clearDeletedTasks(student);
-        }
-      });
-    });
-  });
-
   // addTask 함수: 새 항목 추가 및 수정 지원
   function addTask(student, category, taskId = null, existingTaskData = {}, thisTaskDiv = null) {
     const isEditMode = taskId !== null;
@@ -758,6 +741,9 @@
     btnArea.className = 'btn-area';
     const saveBtn = document.createElement('button');
     saveBtn.textContent = isEditMode ? '수정' : '입력';
+    if (isEditMode) {
+      saveBtn.disabled = true; // 수정 모드에서 초기 비활성화
+    }
     saveBtn.onclick = async () => {
       const newTaskData = {};
       inputs.forEach(({ label, input }) => {
@@ -791,6 +777,19 @@
     btnArea.appendChild(cancelBtn);
     taskDiv.appendChild(btnArea);
 
+    // 수정 모드에서 입력값 변경 감지
+    if (isEditMode) {
+      const checkChanges = () => {
+        const hasChanges = inputs.some(({ label, input }) => input.value !== (existingTaskData[label] || ''));
+        saveBtn.disabled = !hasChanges;
+      };
+      inputs.forEach(({ input }) => {
+        input.addEventListener('input', checkChanges);
+      });
+      // 초기 체크
+      checkChanges();
+    }
+
     if (isEditMode && thisTaskDiv) {
       // 수정 모드: 기존 항목 숨기고 편집 폼 삽입
       thisTaskDiv.style.display = 'none';
@@ -818,6 +817,7 @@
     const container = document.querySelector(`#${category}-${student} .task-list`);
     if (!container) return;
 
+    // 카테고리 헤더에 항목 수 표시
     const h3 = document.querySelector(`#${category}-${student} h3 span`);
     if (h3) {
       h3.textContent = h3.textContent.replace(/\s*\(\d+\)/, '');
@@ -831,28 +831,41 @@
     if (!tasks) return;
 
     let taskArray = Object.entries(tasks);
-    if (['숙제', '공부', '시험'].includes(category)) {
+
+    // 정렬 로직
+    if (['숙제', '공부', '시험', '주말보강'].includes(category)) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       taskArray.sort((a, b) => {
-        const aDateStr = a[1]['마감일'];
-        const bDateStr = b[1]['마감일'];
+        const dateField = category === '주말보강' ? '날짜' : '마감일';
+        const aDateStr = a[1][dateField];
+        const bDateStr = b[1][dateField];
         const aDate = aDateStr ? new Date(aDateStr) : null;
         const bDate = bDateStr ? new Date(bDateStr) : null;
 
-        if (aDate) aDate.setHours(0, 0, 0, 0);
-        if (bDate) bDate.setHours(0, 0, 0, 0);
+        // 유효하지 않은 날짜 처리
+        if (!aDate || isNaN(aDate.getTime())) return 1; // 유효하지 않은 날짜는 리스트 끝으로
+        if (!bDate || isNaN(bDate.getTime())) return -1;
 
-        const aValid = aDate && !isNaN(aDate.getTime());
-        const bValid = bDate && !isNaN(bDate.getTime());
+        // 오늘 날짜와 비교
+        aDate.setHours(0, 0, 0, 0);
+        bDate.setHours(0, 0, 0, 0);
 
-        if (!aValid && !bValid) return 0;
-        if (!aValid) return 1;
-        if (!bValid) return -1;
+        // 마감일이 지난 항목(오늘보다 이전) 우선, 과거순(오름차순)
+        const aIsPast = aDate.getTime() < today.getTime();
+        const bIsPast = bDate.getTime() < today.getTime();
 
+        if (aIsPast && !bIsPast) return -1; // a가 과거면 a 우선
+        if (!aIsPast && bIsPast) return 1;  // b가 과거면 b 우선
+        if (aIsPast && bIsPast) {
+          return aDate.getTime() - bDate.getTime(); // 둘 다 과거면 과거순(오름차순)
+        }
+
+        // 오늘 마감인 항목
         if (aDate.getTime() === today.getTime() && bDate.getTime() !== today.getTime()) return -1;
         if (aDate.getTime() !== today.getTime() && bDate.getTime() === today.getTime()) return 1;
 
+        // 마감일이 3일 이내인 항목
         const aDiff = (aDate - today) / (1000 * 60 * 60 * 24);
         const bDiff = (bDate - today) / (1000 * 60 * 60 * 24);
         const aSoon = aDiff > 0 && aDiff <= 3;
@@ -861,8 +874,12 @@
         if (aSoon && !bSoon) return -1;
         if (!aSoon && bSoon) return 1;
 
+        // 그 외 미래 마감일은 오름차순
         return aDate.getTime() - bDate.getTime();
       });
+    } else if (['completed', 'deleted'].includes(category)) {
+      // 완료/삭제 항목은 taskId(타임스탬프)를 기준으로 내림차순 정렬 (최근 순)
+      taskArray.sort((a, b) => parseInt(b[0]) - parseInt(a[0]));
     }
 
     taskArray.forEach(([taskId, taskData]) => {
@@ -870,12 +887,16 @@
       taskDiv.classList.add('task');
       taskDiv.dataset.taskId = taskId;
 
+      // 마감일 스타일 적용
       let deadlineClass = '';
       if (['숙제', '공부', '시험'].includes(category)) {
         deadlineClass = getDeadlineClass(taskData['마감일']);
+      } else if (category === '주말보강') {
+        deadlineClass = getDeadlineClass(taskData['날짜']);
       }
       if (deadlineClass) taskDiv.classList.add(deadlineClass);
 
+      // 요약 텍스트 생성
       const summarySpan = document.createElement('span');
       if (category === '주말보강') {
         summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['날짜'] || ''} / ${taskData['시간'] || ''}`;
@@ -884,6 +905,7 @@
       }
       taskDiv.appendChild(summarySpan);
 
+      // 버튼 영역
       const btnArea = document.createElement('div');
       btnArea.className = 'btn-area';
 
@@ -906,6 +928,22 @@
           }
         };
         btnArea.appendChild(restoreBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '삭제';
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.onclick = async () => {
+          const confirmed = await customConfirm('이 항목을 영구적으로 삭제하시겠습니까?');
+          if (confirmed) {
+            try {
+              await deleteTask(student, category, taskId);
+            } catch (e) {
+              customPopup('삭제 실패');
+              console.error(e);
+            }
+          }
+        };
+        btnArea.appendChild(deleteBtn);
       } else {
         const editBtn = document.createElement('button');
         editBtn.textContent = '수정';
@@ -928,6 +966,7 @@
 
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = '삭제';
+        deleteBtn.className = 'delete-btn';
         deleteBtn.onclick = async () => {
           try {
             await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
@@ -967,16 +1006,13 @@
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.target;
       const container = document.querySelector(`#${targetId} .task-list`);
-      const deletedControls = document.querySelector(`#${targetId} .deleted-controls`);
       if (!container) return;
       const isHidden = container.style.display === 'none';
       if (isHidden) {
         container.style.display = 'block';
-        if (deletedControls) deletedControls.style.display = 'block';
         btn.textContent = '닫기';
       } else {
         container.style.display = 'none';
-        if (deletedControls) deletedControls.style.display = 'none';
         btn.textContent = '열기';
       }
     });
