@@ -434,6 +434,10 @@
       <h3><span>시험/수행평가</span> <button class="add-btn" data-student="JH" data-category="시험">추가</button></h3>
       <div class="task-list"></div>
     </div>
+    <div class="category" id="주말보강-JH">
+      <h3><span>주말보강</span> <button class="add-btn" data-student="JH" data-category="주말보강">추가</button></h3>
+      <div class="task-list"></div>
+    </div>
     <div class="category" id="completed-JH">
       <h3>
         <span>완료</span>
@@ -450,10 +454,6 @@
         <button class="clear-deleted-btn" data-student="JH">비우기</button>
       </div>
       <div class="task-list" style="display: none;"></div>
-    </div>
-    <div class="category" id="주말보강-JH">
-      <h3><span>주말보강</span> <button class="add-btn" data-student="JH" data-category="주말보강">추가</button></h3>
-      <div class="task-list"></div>
     </div>
     <div class="request-section">
       <h3>요청사항</h3>
@@ -476,6 +476,10 @@
       <h3><span>시험/수행평가</span> <button class="add-btn" data-student="HJ" data-category="시험">추가</button></h3>
       <div class="task-list"></div>
     </div>
+    <div class="category" id="주말보강-HJ">
+      <h3><span>주말보강</span> <button class="add-btn" data-student="HJ" data-category="주말보강">추가</button></h3>
+      <div class="task-list"></div>
+    </div>
     <div class="category" id="completed-HJ">
       <h3>
         <span>완료</span>
@@ -492,10 +496,6 @@
         <button class="clear-deleted-btn" data-student="HJ">비우기</button>
       </div>
       <div class="task-list" style="display: none;"></div>
-    </div>
-    <div class="category" id="주말보강-HJ">
-      <h3><span>주말보강</span> <button class="add-btn" data-student="HJ" data-category="주말보강">추가</button></h3>
-      <div class="task-list"></div>
     </div>
     <div class="request-section">
       <h3>요청사항</h3>
@@ -536,7 +536,7 @@
     });
   }
 
-  // 요청사항 전송 함수 (alert → customPopup)
+  // 요청사항 전송 함수
   window.sendRequest = async function(student) {
     const textarea = document.getElementById(`request-${student}`);
     const message = textarea.value.trim();
@@ -573,7 +573,7 @@
     }
   };
 
-  // 커스텀 confirm 함수 (기존과 동일)
+  // 커스텀 confirm 함수
   function customConfirm(message) {
     return new Promise((resolve) => {
       const overlay = document.createElement('div');
@@ -629,7 +629,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // 카테고리별 입력 항목 정의 (주말보강 개선)
+  // 카테고리별 입력 항목 정의
   const categoryFields = {
     '숙제': [
       { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
@@ -715,10 +715,10 @@
     });
   });
 
-  function addTask(student, category) {
+  function addTask(student, category, taskData = null, taskId = null, originalTaskDiv = null) {
     const taskDiv = document.createElement('div');
     taskDiv.className = 'task';
-    const taskData = {};
+    const newTaskData = taskData ? { ...taskData } : {};
     const inputs = [];
 
     categoryFields[category].forEach(field => {
@@ -733,18 +733,22 @@
           option.textContent = opt;
           input.appendChild(option);
         });
+        if (taskData && taskData[field.label]) input.value = taskData[field.label];
       } else if (field.type === 'text') {
         input = document.createElement('input');
         input.type = 'text';
         if (field.label === '과목') input.placeholder = '예: 수학';
         if (field.label === '범위') input.placeholder = '예: 1~10쪽';
         if (field.label === '내용') input.placeholder = '예: 과학 실험 보고서';
+        if (taskData && taskData[field.label]) input.value = taskData[field.label];
       } else if (field.type === 'date') {
         input = document.createElement('input');
         input.type = 'date';
+        if (taskData && taskData[field.label]) input.value = taskData[field.label];
       } else if (field.type === 'time') {
         input = document.createElement('input');
         input.type = 'time';
+        if (taskData && taskData[field.label]) input.value = taskData[field.label];
       }
       label.appendChild(input);
       taskDiv.appendChild(label);
@@ -754,18 +758,18 @@
     const btnArea = document.createElement('div');
     btnArea.className = 'btn-area';
     const saveBtn = document.createElement('button');
-    saveBtn.textContent = '입력';
+    saveBtn.textContent = taskId ? '저장' : '입력';
     saveBtn.onclick = async () => {
       inputs.forEach(({ label, input }) => {
-        taskData[label] = input.value;
+        newTaskData[label] = input.value;
       });
-      if (Object.values(taskData).some(val => !val)) {
+      if (Object.values(newTaskData).some(val => !val)) {
         customPopup('모든 항목을 입력해주세요.');
         return;
       }
-      const taskId = Date.now().toString();
+      const newTaskId = taskId || Date.now().toString();
       try {
-        await saveTask(student, category, taskId, taskData);
+        await saveTask(student, category, newTaskId, newTaskData);
         taskDiv.remove();
       } catch (e) {
         customPopup('저장 실패');
@@ -774,21 +778,114 @@
     };
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = '취소';
-    cancelBtn.onclick = () => taskDiv.remove();
+    cancelBtn.onclick = () => {
+      if (originalTaskDiv) {
+        // 수정 모드에서 취소 시 원래 태스크로 복원
+        taskDiv.parentNode.replaceChild(originalTaskDiv, taskDiv);
+      } else {
+        // 새 태스크 추가 모드에서 취소 시 태스크 제거
+        taskDiv.remove();
+      }
+    };
     btnArea.appendChild(saveBtn);
     btnArea.appendChild(cancelBtn);
     taskDiv.appendChild(btnArea);
-    document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
+
+    if (originalTaskDiv) {
+      // 수정 모드: 기존 태스크를 새 입력 폼으로 교체
+      originalTaskDiv.parentNode.replaceChild(taskDiv, originalTaskDiv);
+    } else {
+      // 새 태스크 추가: task-list에 추가
+      document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
+    }
   }
 
   function getDeadlineClass(deadline) {
     if (!deadline) return '';
-    const today = new Date();
+    const today = dateFns.startOfDay(new Date());
     const d = new Date(deadline);
-    if (d.toDateString() === today.toDateString()) return 'deadline-today';
-    const diff = (d - today) / (1000 * 60 * 60 * 24);
+    if (dateFns.isSameDay(d, today)) return 'deadline-today';
+    const diff = dateFns.differenceInDays(d, today);
     if (diff > 0 && diff <= 3) return 'deadline-soon';
     return '';
+  }
+
+  function createTaskElement(student, category, taskId, taskData) {
+    const taskDiv = document.createElement('div');
+    let deadlineClass = '';
+    if (['숙제', '공부', '시험'].includes(category)) {
+      deadlineClass = getDeadlineClass(taskData['마감일']);
+    }
+    if (deadlineClass) taskDiv.classList.add(deadlineClass);
+    taskDiv.classList.add('task');
+
+    const summarySpan = document.createElement('span');
+    if (category === '주말보강') {
+      summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['날짜'] || ''} / ${taskData['시간'] || ''}`;
+    } else {
+      summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['범위'] || taskData['내용'] || ''} / ${taskData['마감일'] || taskData['날짜'] || ''}`;
+    }
+    taskDiv.appendChild(summarySpan);
+
+    const btnArea = document.createElement('div');
+    btnArea.className = 'btn-area';
+
+    if (category !== 'completed' && category !== 'deleted') {
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '수정';
+      editBtn.onclick = () => {
+        addTask(student, category, taskData, taskId, taskDiv);
+      };
+      btnArea.appendChild(editBtn);
+    }
+
+    if (category === 'completed' || category === 'deleted') {
+      const restoreBtn = document.createElement('button');
+      restoreBtn.textContent = '복구';
+      restoreBtn.onclick = async () => {
+        if (!taskData.originalCategory) {
+          customPopup('복구할 원래 카테고리 정보가 없습니다.');
+          return;
+        }
+        const originalCategory = taskData.originalCategory;
+        const newTaskData = { ...taskData };
+        delete newTaskData.originalCategory;
+        try {
+          await moveTask(student, category, originalCategory, taskId, newTaskData);
+        } catch (e) {
+          customPopup('복구 실패');
+          console.error(e);
+        }
+      };
+      btnArea.appendChild(restoreBtn);
+    } else {
+      const completeBtn = document.createElement('button');
+      completeBtn.textContent = '완료';
+      completeBtn.onclick = async () => {
+        try {
+          await moveTask(student, category, 'completed', taskId, { ...taskData, originalCategory: category });
+        } catch (e) {
+          customPopup('완료 처리 실패');
+          console.error(e);
+        }
+      };
+      btnArea.appendChild(completeBtn);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '삭제';
+      deleteBtn.onclick = async () => {
+        try {
+          await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
+        } catch (e) {
+          customPopup('삭제 처리 실패');
+          console.error(e);
+        }
+      };
+      btnArea.appendChild(deleteBtn);
+    }
+
+    taskDiv.appendChild(btnArea);
+    return taskDiv;
   }
 
   function renderTasks(student, category, tasks) {
@@ -820,10 +917,10 @@
         if (!bValid) return -1;
         if (aDate.toDateString() === today.toDateString() && bDate.toDateString() !== today.toDateString()) return -1;
         if (aDate.toDateString() !== today.toDateString() && bDate.toDateString() === today.toDateString()) return 1;
-        const aDiff = (aDate - today) / (1000 * 60 * 60 * 24);
-        const bDiff = (bDate - today) / (1000 * 60 * 60 * 24);
-        const aSoon = aDiff > 0 && aDiff <= 3;
-        const bSoon = bDiff > 0 && bDiff <= 3;
+        const diffA = (aDate - today) / (1000 * 60 * 60 * 24);
+        const diffB = (bDate - today) / (1000 * 60 * 60 * 24);
+        const aSoon = diffA > 0 && diffA <= 3;
+        const bSoon = diffB > 0 && diffB <= 3;
         if (aSoon && !bSoon) return -1;
         if (!aSoon && bSoon) return 1;
         return aDate - bDate;
@@ -831,71 +928,7 @@
     }
 
     taskArray.forEach(([taskId, taskData]) => {
-      const taskDiv = document.createElement('div');
-      let deadlineClass = '';
-      if (['숙제', '공부', '시험'].includes(category)) {
-        deadlineClass = getDeadlineClass(taskData['마감일']);
-      }
-      if (deadlineClass) taskDiv.classList.add(deadlineClass);
-      taskDiv.classList.add('task');
-
-      const summarySpan = document.createElement('span');
-      if (category === '주말보강') {
-        summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['날짜'] || ''} / ${taskData['시간'] || ''}`;
-      } else {
-        summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['범위'] || taskData['내용'] || ''} / ${taskData['마감일'] || taskData['날짜'] || ''}`;
-      }
-      taskDiv.appendChild(summarySpan);
-
-      const btnArea = document.createElement('div');
-      btnArea.className = 'btn-area';
-
-      if (category === 'completed' || category === 'deleted') {
-        const restoreBtn = document.createElement('button');
-        restoreBtn.textContent = '복구';
-        restoreBtn.onclick = async () => {
-          if (!taskData.originalCategory) {
-            customPopup('복구할 원래 카테고리 정보가 없습니다.');
-            return;
-          }
-          const originalCategory = taskData.originalCategory;
-          const newTaskData = { ...taskData };
-          delete newTaskData.originalCategory;
-          try {
-            await moveTask(student, category, originalCategory, taskId, newTaskData);
-          } catch (e) {
-            customPopup('복구 실패');
-            console.error(e);
-          }
-        };
-        btnArea.appendChild(restoreBtn);
-      } else {
-        const completeBtn = document.createElement('button');
-        completeBtn.textContent = '완료';
-        completeBtn.onclick = async () => {
-          try {
-            await moveTask(student, category, 'completed', taskId, { ...taskData, originalCategory: category });
-          } catch (e) {
-            customPopup('완료 처리 실패');
-            console.error(e);
-          }
-        };
-        btnArea.appendChild(completeBtn);
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = '삭제';
-        deleteBtn.onclick = async () => {
-          try {
-            await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
-          } catch (e) {
-            customPopup('삭제 처리 실패');
-            console.error(e);
-          }
-        };
-        btnArea.appendChild(deleteBtn);
-      }
-
-      taskDiv.appendChild(btnArea);
+      const taskDiv = createTaskElement(student, category, taskId, taskData);
       container.appendChild(taskDiv);
     });
   }
