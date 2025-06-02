@@ -85,8 +85,9 @@
       gap: 15px;
       margin-left: 24px;
     }
+    /* 학생 선택 버튼 (JH, HJ)은 이제 숨김 처리 */
     .student-selector {
-      display: flex;
+      display: none; /* 변경: 학생 선택 버튼 숨김 */
       gap: 8px;
     }
     .student-btn {
@@ -164,11 +165,10 @@
       background: var(--card-bg);
       padding: 18px 24px 18px 24px;
       transition: background 0.3s, box-shadow 0.3s;
-      display: none;
+      /* 변경: 이제 하나의 섹션만 존재하므로 기본적으로 active 상태로 설정 */
+      display: block; /* 항상 보이게 설정 */
     }
-    .student-section.active {
-      display: block;
-    }
+    /* .student-section.active { display: block; } */ /* 변경: 불필요 */
     .category {
       margin-top: 28px;
       border-left: 7px solid var(--border);
@@ -451,7 +451,7 @@
   <div class="header-fixed">
     <div class="header-left">
       <h2>학생 일정 관리</h2>
-      <div class="student-selector">
+      <div class="student-selector" style="display: none;">
         <button class="student-btn active" data-student="JH">JH</button>
         <button class="student-btn" data-student="HJ">HJ</button>
       </div>
@@ -464,83 +464,45 @@
     <button class="dark-toggle-btn" id="darkToggleBtn">다크모드</button>
   </div>
 
-  <div class="student-section active" id="student-JH">
-    <div class="category" id="숙제-JH">
-      <h3><span>숙제</span> <button class="add-btn" data-student="JH" data-category="숙제">추가</button></h3>
+  <div class="student-section active" id="student-main">
+    <div class="category" id="숙제-main">
+      <h3><span>숙제</span> <button class="add-btn" data-category="숙제">추가</button></h3>
       <div class="task-list"></div>
     </div>
-    <div class="category" id="공부-JH">
-      <h3><span>공부</span> <button class="add-btn" data-student="JH" data-category="공부">추가</button></h3>
+    <div class="category" id="공부-main">
+      <h3><span>공부</span> <button class="add-btn" data-category="공부">추가</button></h3>
       <div class="task-list"></div>
     </div>
-    <div class="category" id="시험-JH">
-      <h3><span>시험/수행평가</span> <button class="add-btn" data-student="JH" data-category="시험">추가</button></h3>
+    <div class="category" id="시험-main">
+      <h3><span>시험/수행평가</span> <button class="add-btn" data-category="시험">추가</button></h3>
       <div class="task-list"></div>
     </div>
-    <div class="category" id="주말보강-JH">
-      <h3><span>주말보강</span> <button class="add-btn" data-student="JH" data-category="주말보강">추가</button></h3>
+    <div class="category" id="주말보강-main">
+      <h3><span>주말보강</span> <button class="add-btn" data-category="주말보강">추가</button></h3>
       <div class="task-list"></div>
     </div>
-    <div class="category" id="completed-JH">
+    <div class="category" id="completed-main">
       <h3>
         <span>완료</span>
-        <button class="toggle-btn" data-target="completed-JH">열기</button>
+        <button class="toggle-btn" data-target="completed-main">열기</button>
       </h3>
       <div class="task-list" style="display: none;"></div>
     </div>
-    <div class="category" id="deleted-JH">
+    <div class="category" id="deleted-main">
       <h3>
         <span>삭제</span>
-        <button class="toggle-btn" data-target="deleted-JH">열기</button>
+        <button class="toggle-btn" data-target="deleted-main">열기</button>
       </h3>
       <div class="task-list" style="display: none;"></div>
     </div>
     <div class="request-section">
       <h3>요청사항</h3>
-      <textarea class="request-textarea" id="request-JH" placeholder="요청사항을 입력해주세요..."></textarea>
-      <button class="send-btn" onclick="sendRequest('JH')">전송</button>
+      <textarea class="request-textarea" id="request-main" placeholder="요청사항을 입력해주세요..."></textarea>
+      <button class="send-btn" onclick="sendRequest()">전송</button>
     </div>
   </div>
 
-  <div class="student-section" id="student-HJ">
-    <div class="category" id="숙제-HJ">
-      <h3><span>숙제</span> <button class="add-btn" data-student="HJ" data-category="숙제">추가</button></h3>
-      <div class="task-list"></div>
-    </div>
-    <div class="category" id="공부-HJ">
-      <h3><span>공부</span> <button class="add-btn" data-student="HJ" data-category="공부">추가</button></h3>
-      <div class="task-list"></div>
-    </div>
-    <div class="category" id="시험-HJ">
-      <h3><span>시험/수행평가</span> <button class="add-btn" data-student="HJ" data-category="시험">추가</button></h3>
-      <div class="task-list"></div>
-    </div>
-    <div class="category" id="주말보강-HJ">
-      <h3><span>주말보강</span> <button class="add-btn" data-student="HJ" data-category="주말보강">추가</button></h3>
-      <div class="task-list"></div>
-    </div>
-    <div class="category" id="completed-HJ">
-      <h3>
-        <span>완료</span>
-        <button class="toggle-btn" data-target="completed-HJ">열기</button>
-      </h3>
-      <div class="task-list" style="display: none;"></div>
-    </div>
-    <div class="category" id="deleted-HJ">
-      <h3>
-        <span>삭제</span>
-        <button class="toggle-btn" data-target="deleted-HJ">열기</button>
-      </h3>
-      <div class="task-list" style="display: none;"></div>
-    </div>
-    <div class="request-section">
-      <h3>요청사항</h3>
-      <textarea class="request-textarea" id="request-HJ" placeholder="요청사항을 입력해주세요..."></textarea>
-      <button class="send-btn" onclick="sendRequest('HJ')">전송</button>
-    </div>
-  </div>
-
-<script type="module">
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
   import { getDatabase, ref, set, remove, onValue, get } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
@@ -548,6 +510,9 @@
   // 텔레그램 봇 설정
   const TELEGRAM_BOT_TOKEN = '7760918691:AAErUKe2pQEZzHVzUwUQYneJwrM2YgzPGG4';
   const TELEGRAM_CHAT_ID = '1869276713';
+
+  // **변경: 현재 로그인한 사용자의 UID를 저장할 전역 변수**
+  let currentLoggedInUserUid = null;
 
   // 커스텀 팝업 함수 (alert 대체)
   function customPopup(message) {
@@ -573,9 +538,13 @@
     });
   }
 
-  // 요청사항 전송 함수
-  window.sendRequest = async function(student) {
-    const textarea = document.getElementById(`request-${student}`);
+  // 요청사항 전송 함수 (변경: student 매개변수 제거, currentLoggedInUserUid 사용)
+  window.sendRequest = async function() {
+    if (!currentLoggedInUserUid) {
+        customPopup('로그인 후 요청사항을 전송할 수 있습니다.');
+        return;
+    }
+    const textarea = document.getElementById(`request-main`); // 변경: ID를 고정된 'request-main'으로 변경
     const message = textarea.value.trim();
     if (!message) {
       customPopup('요청사항을 입력해주세요.');
@@ -585,7 +554,9 @@
     sendBtn.disabled = true;
     sendBtn.textContent = '전송 중...';
     try {
-      const telegramMessage = `📝 **${student} 학생 요청사항**\n\n${message}\n\n📅 ${new Date().toLocaleString('ko-KR')}`;
+      // 텔레그램 메시지에 사용자 이름/UID 포함 (선택 사항)
+      const userDisplayName = auth.currentUser ? auth.currentUser.displayName || '알 수 없는 사용자' : '비로그인 사용자';
+      const telegramMessage = `📝 **${userDisplayName} (${currentLoggedInUserUid.substring(0, 8)}...) 요청사항**\n\n${message}\n\n📅 ${new Date().toLocaleString('ko-KR')}`;
       const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -689,13 +660,14 @@
       { label: '날짜', type: 'date' },
       { label: '시간', type: 'time' }
     ],
-    '수행평가': [
+    '수행평가': [ // HTML에 없지만 정의는 유지
       { label: '내용', type: 'text' },
       { label: '마감일', type: 'date' }
     ]
   };
 
-  // 학생 선택 기능
+  // **변경: 학생 선택 기능은 이제 필요 없으므로 제거 (주석 처리)**
+  /*
   document.querySelectorAll('.student-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const student = btn.dataset.student;
@@ -707,6 +679,7 @@
       document.getElementById(`student-${student}`).classList.add('active');
     });
   });
+  */
 
   // 다크모드 토글
   const darkBtn = document.getElementById('darkToggleBtn');
@@ -729,14 +702,13 @@
   document.getElementById('googleSignInBtn').addEventListener('click', async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      // 로그인 성공 시, 캘린더 API 접근을 위한 토큰 저장 (임시, 실제 운영에서는 백엔드에서 관리 권장)
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential.accessToken;
       const user = result.user;
       console.log("구글 로그인 성공:", user.displayName, user.email);
       await customPopup(`안녕하세요, ${user.displayName}님!`);
       localStorage.setItem('googleAccessToken', token);
-      // 로그인 후 캘린더 기능 활성화 등의 추가 작업
+      // 로그인 성공 시 onAuthStateChanged가 호출되므로 추가 로직은 그곳에서 처리
     } catch (error) {
       console.error("구글 로그인 오류:", error);
       let errorMessage = '구글 로그인에 실패했습니다. 다시 시도해주세요.';
@@ -745,7 +717,9 @@
       } else if (error.code === 'auth/cancelled-popup-request') {
         errorMessage = '이미 로그인 요청이 진행 중입니다.';
       } else if (error.code === 'auth/operation-not-allowed') {
-        errorMessage = '이메일/비밀번호 로그인이 활성화되지 않았습니다.'; // Google 로그인만 활성화해야 함
+        errorMessage = '이메일/비밀번호 로그인이 활성화되지 않았습니다.';
+      } else if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = '승인되지 않은 도메인입니다. Firebase 설정 확인하세요.';
       }
       await customPopup(errorMessage);
     }
@@ -756,6 +730,7 @@
     try {
       await signOut(auth);
       localStorage.removeItem('googleAccessToken');
+      // 로그아웃 후 UI 초기화 (onAuthStateChanged에서 처리)
       await customPopup('로그아웃되었습니다.');
     } catch (error) {
       console.error("구글 로그아웃 오류:", error);
@@ -763,20 +738,30 @@
     }
   });
 
-  // 인증 상태 변화 감지
+  // 인증 상태 변화 감지 (변경: 로그인/로그아웃 시 데이터 로드/초기화)
   onAuthStateChanged(auth, (user) => {
     const signInBtn = document.getElementById('googleSignInBtn');
     const signOutBtn = document.getElementById('googleSignOutBtn');
     const userDisplayName = document.getElementById('userDisplayName');
+    const studentSection = document.getElementById('student-main'); // 메인 학생 섹션
 
     if (user) {
+      currentLoggedInUserUid = user.uid; // 로그인한 사용자의 UID 저장
       signInBtn.style.display = 'none';
       signOutBtn.style.display = 'inline-block';
       userDisplayName.textContent = `${user.displayName}님`;
+      studentSection.style.display = 'block'; // 로그인하면 일정 섹션 보이게 함
+      loadAllTasks(currentLoggedInUserUid); // 로그인한 사용자의 데이터만 로드
+      loadRequests(currentLoggedInUserUid); // 해당 사용자의 요청사항 로드
     } else {
+      currentLoggedInUserUid = null; // 로그아웃 시 UID 초기화
       signInBtn.style.display = 'inline-block';
       signOutBtn.style.display = 'none';
       userDisplayName.textContent = '';
+      studentSection.style.display = 'none'; // 로그아웃하면 일정 섹션 숨김
+      // 모든 작업 리스트 초기화 (화면 비우기)
+      document.querySelectorAll('.task-list').forEach(list => list.innerHTML = '');
+      document.querySelectorAll('.request-textarea').forEach(textarea => textarea.value = '');
     }
   });
 
@@ -785,24 +770,29 @@
     return localStorage.getItem('googleAccessToken');
   }
 
-  // 구글 캘린더 이벤트 생성
-  async function createCalendarEvent(taskData, category, student) {
+  // 구글 캘린더 이벤트 생성 (변경: student 매개변수 제거, userDisplayName 사용)
+  async function createCalendarEvent(taskData, category) {
     const accessToken = getGoogleAccessToken();
     if (!accessToken) {
       console.warn("구글 Access Token이 없습니다. 캘린더 이벤트를 생성할 수 없습니다.");
       await customPopup('구글 캘린더에 일정을 추가하려면 로그인해주세요.');
       return null;
     }
+    if (!auth.currentUser) {
+        console.warn("로그인된 사용자가 없습니다. 캘린더 이벤트를 생성할 수 없습니다.");
+        await customPopup('로그인 후 캘린더 이벤트를 생성해주세요.');
+        return null;
+    }
 
     let eventTitle = '';
     let eventStart = '';
     let eventEnd = '';
     let description = '';
+    const userName = auth.currentUser.displayName || "사용자"; // 로그인한 사용자 이름
 
     if (category === '주말보강') {
-      eventTitle = `${student} 학생 주말보강: ${taskData['과목']}`;
+      eventTitle = `${userName} 학생 주말보강: ${taskData['과목']}`; // 변경: student 대신 userName
       eventStart = `${taskData['날짜']}T${taskData['시간']}:00`;
-      // 보강 시간을 1시간으로 가정하거나, 필요에 따라 종료 시간 계산
       const [hours, minutes] = taskData['시간'].split(':').map(Number);
       const endDate = new Date(taskData['날짜']);
       endDate.setHours(hours + 1, minutes, 0); // 1시간 뒤로 설정
@@ -810,7 +800,7 @@
       description = `과목: ${taskData['과목']}\n시간: ${taskData['시간']}`;
     } else { // 숙제, 공부, 시험
       const deadline = taskData['마감일'];
-      eventTitle = `${student} 학생 ${category}: ${taskData['과목'] || ''}`;
+      eventTitle = `${userName} 학생 ${category}: ${taskData['과목'] || ''}`; // 변경: student 대신 userName
       eventStart = `${deadline}T09:00:00`; // 마감일 오전 9시로 기본 설정
       eventEnd = `${deadline}T10:00:00`; // 1시간 뒤로 설정
       description = `과목: ${taskData['과목'] || ''}\n범위: ${taskData['범위'] || taskData['내용'] || ''}\n마감일: ${deadline}`;
@@ -867,21 +857,27 @@
     }
   }
 
-  // 구글 캘린더 이벤트 업데이트
-  async function updateCalendarEvent(eventId, taskData, category, student) {
+  // 구글 캘린더 이벤트 업데이트 (변경: student 매개변수 제거, userDisplayName 사용)
+  async function updateCalendarEvent(eventId, taskData, category) {
     const accessToken = getGoogleAccessToken();
     if (!accessToken || !eventId) {
       console.warn("구글 Access Token 또는 이벤트 ID가 없습니다. 캘린더 이벤트를 업데이트할 수 없습니다.");
       return false;
+    }
+    if (!auth.currentUser) {
+        console.warn("로그인된 사용자가 없습니다. 캘린더 이벤트를 업데이트할 수 없습니다.");
+        await customPopup('로그인 후 캘린더 이벤트를 업데이트해주세요.');
+        return null;
     }
 
     let eventTitle = '';
     let eventStart = '';
     let eventEnd = '';
     let description = '';
+    const userName = auth.currentUser.displayName || "사용자"; // 로그인한 사용자 이름
 
     if (category === '주말보강') {
-      eventTitle = `${student} 학생 주말보강: ${taskData['과목']}`;
+      eventTitle = `${userName} 학생 주말보강: ${taskData['과목']}`; // 변경: student 대신 userName
       eventStart = `${taskData['날짜']}T${taskData['시간']}:00`;
       const [hours, minutes] = taskData['시간'].split(':').map(Number);
       const endDate = new Date(taskData['날짜']);
@@ -890,7 +886,7 @@
       description = `과목: ${taskData['과목']}\n시간: ${taskData['시간']}`;
     } else {
       const deadline = taskData['마감일'];
-      eventTitle = `${student} 학생 ${category}: ${taskData['과목'] || ''}`;
+      eventTitle = `${userName} 학생 ${category}: ${taskData['과목'] || ''}`; // 변경: student 대신 userName
       eventStart = `${deadline}T09:00:00`;
       eventEnd = `${deadline}T10:00:00`;
       description = `과목: ${taskData['과목'] || ''}\n범위: ${taskData['범위'] || taskData['내용'] || ''}\n마감일: ${deadline}`;
@@ -946,7 +942,7 @@
     }
   }
 
-  // 구글 캘린더 이벤트 삭제
+  // 구글 캘린더 이벤트 삭제 (변화 없음)
   async function deleteCalendarEvent(eventId) {
     const accessToken = getGoogleAccessToken();
     if (!accessToken || !eventId) {
@@ -987,16 +983,22 @@
   // --- 구글 로그인 및 캘린더 관련 코드 끝 ---
 
 
-  // Firebase 데이터 저장 함수 (기존)
-  function saveTask(student, category, taskId, taskData) {
-    return set(ref(db, `tasks/${student}/${category}/${taskId}`), taskData);
+  // Firebase 데이터 저장 함수 (변경: student 매개변수 제거, currentLoggedInUserUid 사용)
+  function saveTask(category, taskId, taskData) {
+    if (!currentLoggedInUserUid) {
+        customPopup('로그인 후 일정을 저장할 수 있습니다.');
+        return Promise.reject('User not logged in');
+    }
+    return set(ref(db, `tasks/${currentLoggedInUserUid}/${category}/${taskId}`), taskData);
   }
 
-  // Firebase 데이터 삭제 함수 (기존)
-  // **주의: deleteTask는 이제 캘린더 이벤트도 처리하도록 수정됩니다.**
-  async function deleteTask(student, category, taskId) {
-    const taskRef = ref(db, `tasks/${student}/${category}/${taskId}`);
-    // Firebase에서 항목을 삭제하기 전에 캘린더 이벤트 ID를 가져옵니다.
+  // Firebase 데이터 삭제 함수 (변경: student 매개변수 제거, currentLoggedInUserUid 사용)
+  async function deleteTask(category, taskId) {
+    if (!currentLoggedInUserUid) {
+        customPopup('로그인 후 일정을 삭제할 수 있습니다.');
+        return Promise.reject('User not logged in');
+    }
+    const taskRef = ref(db, `tasks/${currentLoggedInUserUid}/${category}/${taskId}`);
     const snapshot = await get(taskRef);
     const taskData = snapshot.val();
 
@@ -1006,40 +1008,45 @@
     return remove(taskRef);
   }
 
-  // Firebase 항목 이동 함수 (기존)
-  // **주의: moveTask는 이제 캘린더 이벤트도 처리하도록 수정됩니다.**
-  async function moveTask(student, fromCategory, toCategory, taskId, taskData) {
+  // Firebase 항목 이동 함수 (변경: student 매개변수 제거, currentLoggedInUserUid 사용)
+  async function moveTask(fromCategory, toCategory, taskId, taskData) {
+    if (!currentLoggedInUserUid) {
+        customPopup('로그인 후 일정을 이동할 수 있습니다.');
+        return Promise.reject('User not logged in');
+    }
     let newGoogleEventId = taskData.googleCalendarEventId || null;
 
     if (toCategory === 'completed' || toCategory === 'deleted') {
-      // '완료' 또는 '삭제'로 이동 시 캘린더 이벤트 삭제
       if (newGoogleEventId) {
         await deleteCalendarEvent(newGoogleEventId);
       }
-      // 캘린더 이벤트 ID는 더 이상 필요 없으므로 삭제
       const newData = { ...taskData };
       delete newData.googleCalendarEventId;
-      await saveTask(student, toCategory, taskId, newData);
+      await saveTask(toCategory, taskId, newData); // 변경: student 매개변수 제거
     } else {
-      // 다른 카테고리로 복구 또는 이동 시 캘린더 이벤트 업데이트 또는 생성
-      // 이전에 googleCalendarEventId가 있었으면 업데이트, 없었으면 새로 생성
       if (newGoogleEventId) {
-          await updateCalendarEvent(newGoogleEventId, taskData, toCategory, student);
+          // 기존 이벤트 ID가 있으면 업데이트 (student 매개변수 제거)
+          await updateCalendarEvent(newGoogleEventId, taskData, toCategory);
       } else {
-          // 새로 생성하거나 이전에 삭제된 이벤트였을 경우 재등록
-          const createdEventId = await createCalendarEvent(taskData, toCategory, student);
+          // 없으면 새로 생성 (student 매개변수 제거)
+          const createdEventId = await createCalendarEvent(taskData, toCategory);
           if (createdEventId) {
               taskData.googleCalendarEventId = createdEventId;
           }
       }
-      await saveTask(student, toCategory, taskId, taskData);
+      await saveTask(toCategory, taskId, taskData); // 변경: student 매개변수 제거
     }
-    await remove(ref(db, `tasks/${student}/${fromCategory}/${taskId}`)); // 원래 위치에서 삭제
+    await remove(ref(db, `tasks/${currentLoggedInUserUid}/${fromCategory}/${taskId}`)); // 변경: currentLoggedInUserUid 사용
   }
 
 
-  // addTask 함수: 새 항목 추가 및 수정 지원 (수정됨)
-  function addTask(student, category, taskId = null, existingTaskData = {}, thisTaskDiv = null) {
+  // addTask 함수: 새 항목 추가 및 수정 지원 (수정됨: student 매개변수 제거)
+  function addTask(category, taskId = null, existingTaskData = {}, thisTaskDiv = null) {
+    if (!currentLoggedInUserUid) { // 로그인 여부 확인
+        customPopup('로그인 후 일정을 추가할 수 있습니다.');
+        return;
+    }
+
     const isEditMode = taskId !== null;
     const taskDiv = document.createElement('div');
     taskDiv.className = 'task';
@@ -1097,21 +1104,20 @@
       }
       const finalTaskId = taskId || Date.now().toString();
       try {
-        // 구글 캘린더 이벤트 처리
         let currentGoogleEventId = existingTaskData.googleCalendarEventId || null;
 
         if (currentGoogleEventId && isEditMode) {
-          // 기존 항목 수정 시 캘린더 이벤트 업데이트
-          await updateCalendarEvent(currentGoogleEventId, newTaskData, category, student);
+          // 기존 항목 수정 시 캘린더 이벤트 업데이트 (student 매개변수 제거)
+          await updateCalendarEvent(currentGoogleEventId, newTaskData, category);
         } else {
-          // 새 항목 추가 또는 기존 항목에 캘린더 이벤트가 없었을 경우 생성
-          const newEventId = await createCalendarEvent(newTaskData, category, student);
+          // 새 항목 추가 또는 기존 항목에 캘린더 이벤트가 없었을 경우 생성 (student 매개변수 제거)
+          const newEventId = await createCalendarEvent(newTaskData, category);
           if (newEventId) {
             newTaskData.googleCalendarEventId = newEventId; // 이벤트 ID 저장
           }
         }
 
-        await saveTask(student, category, finalTaskId, newTaskData);
+        await saveTask(category, finalTaskId, newTaskData); // 변경: student 매개변수 제거
         taskDiv.remove(); // 입력/수정 폼 제거
         if (isEditMode && thisTaskDiv) {
           thisTaskDiv.remove(); // 기존 항목 제거 (renderTasks가 새로 그림)
@@ -1146,13 +1152,16 @@
       checkChanges();
     }
 
-    if (isEditMode && thisTaskDiv) {
-      // 수정 모드: 기존 항목 숨기고 편집 폼 삽입
-      thisTaskDiv.style.display = 'none';
-      thisTaskDiv.parentNode.insertBefore(taskDiv, thisTaskDiv.nextSibling);
-    } else {
-      // 추가 모드: 리스트 맨 위에 추가
-      document.querySelector(`#${category}-${student} .task-list`).prepend(taskDiv);
+    // 변경: DOM 셀렉터에 'student' 대신 '-main' 사용
+    const targetCategoryDiv = document.querySelector(`#${category}-main`);
+    if (targetCategoryDiv) {
+        const taskList = targetCategoryDiv.querySelector('.task-list');
+        if (isEditMode && thisTaskDiv) {
+            thisTaskDiv.style.display = 'none';
+            thisTaskDiv.parentNode.insertBefore(taskDiv, thisTaskDiv.nextSibling);
+        } else {
+            taskList.prepend(taskDiv);
+        }
     }
   }
 
@@ -1169,12 +1178,14 @@
     return '';
   }
 
-  function renderTasks(student, category, tasks) {
-    const container = document.querySelector(`#${category}-${student} .task-list`);
+  // renderTasks 함수 (변경: student 매개변수를 userUid로 변경, DOM 셀렉터 수정)
+  function renderTasks(userUid, category, tasks) {
+    // 변경: DOM 셀렉터에 userUid 대신 '-main' 사용
+    const container = document.querySelector(`#${category}-main .task-list`);
     if (!container) return;
 
-    // 카테고리 헤더에 항목 수 표시
-    const h3 = document.querySelector(`#${category}-${student} h3 span`);
+    // 카테고리 헤더에 항목 수 표시 (변경: student 매개변수 제거)
+    const h3 = document.querySelector(`#${category}-main h3 span`); // 변경: student 대신 '-main'
     if (h3) {
       h3.textContent = h3.textContent.replace(/\s*\(\d+\)/, '');
       const count = tasks ? Object.keys(tasks).length : 0;
@@ -1188,7 +1199,7 @@
 
     let taskArray = Object.entries(tasks);
 
-    // 정렬 로직
+    // 정렬 로직 (변경 없음)
     if (['숙제', '공부', '시험', '주말보강'].includes(category)) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -1200,28 +1211,24 @@
         const bDate = bDateStr ? new Date(bDateStr) : null;
 
         // 유효하지 않은 날짜 처리
-        if (!aDate || isNaN(aDate.getTime())) return 1; // 유효하지 않은 날짜는 리스트 끝으로
+        if (!aDate || isNaN(aDate.getTime())) return 1;
         if (!bDate || isNaN(bDate.getTime())) return -1;
 
-        // 오늘 날짜와 비교
         aDate.setHours(0, 0, 0, 0);
         bDate.setHours(0, 0, 0, 0);
 
-        // 마감일이 지난 항목(오늘보다 이전) 우선, 과거순(오름차순)
         const aIsPast = aDate.getTime() < today.getTime();
         const bIsPast = bDate.getTime() < today.getTime();
 
-        if (aIsPast && !bIsPast) return -1; // a가 과거면 a 우선
-        if (!aIsPast && bIsPast) return 1;  // b가 과거면 b 우선
+        if (aIsPast && !bIsPast) return -1;
+        if (!aIsPast && bIsPast) return 1;
         if (aIsPast && bIsPast) {
-          return aDate.getTime() - bDate.getTime(); // 둘 다 과거면 과거순(오름차순)
+          return aDate.getTime() - bDate.getTime();
         }
 
-        // 오늘 마감인 항목
         if (aDate.getTime() === today.getTime() && bDate.getTime() !== today.getTime()) return -1;
         if (aDate.getTime() !== today.getTime() && bDate.getTime() === today.getTime()) return 1;
 
-        // 마감일이 3일 이내인 항목
         const aDiff = (aDate - today) / (1000 * 60 * 60 * 24);
         const bDiff = (bDate - today) / (1000 * 60 * 60 * 24);
         const aSoon = aDiff > 0 && aDiff <= 3;
@@ -1230,11 +1237,9 @@
         if (aSoon && !bSoon) return -1;
         if (!aSoon && bSoon) return 1;
 
-        // 그 외 미래 마감일은 오름차순
         return aDate.getTime() - bDate.getTime();
       });
     } else if (['completed', 'deleted'].includes(category)) {
-      // 완료/삭제 항목은 taskId(타임스탬프)를 기준으로 내림차순 정렬 (최근 순)
       taskArray.sort((a, b) => parseInt(b[0]) - parseInt(a[0]));
     }
 
@@ -1243,7 +1248,6 @@
       taskDiv.classList.add('task');
       taskDiv.dataset.taskId = taskId;
 
-      // 마감일 스타일 적용
       let deadlineClass = '';
       if (['숙제', '공부', '시험'].includes(category)) {
         deadlineClass = getDeadlineClass(taskData['마감일']);
@@ -1252,7 +1256,6 @@
       }
       if (deadlineClass) taskDiv.classList.add(deadlineClass);
 
-      // 요약 텍스트 생성
       const summarySpan = document.createElement('span');
       if (category === '주말보강') {
         summarySpan.textContent = `${taskData['과목'] || ''} / ${taskData['날짜'] || ''} / ${taskData['시간'] || ''}`;
@@ -1261,7 +1264,6 @@
       }
       taskDiv.appendChild(summarySpan);
 
-      // 버튼 영역
       const btnArea = document.createElement('div');
       btnArea.className = 'btn-area';
 
@@ -1275,9 +1277,9 @@
           }
           const originalCategory = taskData.originalCategory;
           const newTaskData = { ...taskData };
-          delete newTaskData.originalCategory; // 복구 시 originalCategory는 제거
+          delete newTaskData.originalCategory;
           try {
-            await moveTask(student, category, originalCategory, taskId, newTaskData);
+            await moveTask(category, originalCategory, taskId, newTaskData); // 변경: student 매개변수 제거
           } catch (e) {
             customPopup('복구 실패');
             console.error(e);
@@ -1292,7 +1294,7 @@
           const confirmed = await customConfirm('이 항목을 영구적으로 삭제하시겠습니까?');
           if (confirmed) {
             try {
-              await deleteTask(student, category, taskId);
+              await deleteTask(category, taskId); // 변경: student 매개변수 제거
             } catch (e) {
               customPopup('삭제 실패');
               console.error(e);
@@ -1304,7 +1306,7 @@
         const editBtn = document.createElement('button');
         editBtn.textContent = '수정';
         editBtn.onclick = () => {
-          addTask(student, category, taskId, taskData, taskDiv);
+          addTask(category, taskId, taskData, taskDiv); // 변경: student 매개변수 제거
         };
         btnArea.appendChild(editBtn);
 
@@ -1312,8 +1314,7 @@
         completeBtn.textContent = '완료';
         completeBtn.onclick = async () => {
           try {
-            // 완료 시 originalCategory를 저장하여 복구 시 원래 카테고리로 돌아갈 수 있도록 함
-            await moveTask(student, category, 'completed', taskId, { ...taskData, originalCategory: category });
+            await moveTask(category, 'completed', taskId, { ...taskData, originalCategory: category }); // 변경: student 매개변수 제거
           } catch (e) {
             customPopup('완료 처리 실패');
             console.error(e);
@@ -1326,8 +1327,7 @@
         deleteBtn.className = 'delete-btn';
         deleteBtn.onclick = async () => {
           try {
-            // 삭제 시 originalCategory를 저장하여 복구 시 원래 카테고리로 돌아갈 수 있도록 함
-            await moveTask(student, category, 'deleted', taskId, { ...taskData, originalCategory: category });
+            await moveTask(category, 'deleted', taskId, { ...taskData, originalCategory: category }); // 변경: student 매개변수 제거
           } catch (e) {
             customPopup('삭제 처리 실패');
             console.error(e);
@@ -1341,28 +1341,48 @@
     });
   }
 
-  function loadAllTasks(student) {
+  // **변경: loadAllTasks 함수도 student 매개변수를 userUid로 변경**
+  function loadAllTasks(userUid) {
     const categories = ['숙제', '공부', '시험', '주말보강', 'completed', 'deleted'];
     categories.forEach(category => {
-      const tasksRef = ref(db, `tasks/${student}/${category}`);
+      const tasksRef = ref(db, `tasks/${userUid}/${category}`); // 변경: userUid 사용
       onValue(tasksRef, snapshot => {
         const data = snapshot.val();
-        renderTasks(student, category, data);
+        renderTasks(userUid, category, data); // 변경: userUid 전달
       });
     });
   }
 
+  // **변경: 요청사항 로드 함수 추가**
+  function loadRequests(userUid) {
+    if (!userUid) return;
+    const requestRef = ref(db, `requests/${userUid}`); // requests/UID 경로 사용
+    onValue(requestRef, (snapshot) => {
+        const requestData = snapshot.val();
+        const textarea = document.getElementById('request-main');
+        // 보통 요청사항은 하나만 저장하거나 최신 것만 보여주므로, 데이터 구조에 따라 로딩 로직 변경
+        if (requestData && requestData.message) { // 예시: requests/UID/message 에 저장된 경우
+            textarea.value = requestData.message;
+        } else {
+            textarea.value = '';
+        }
+    });
+  }
+
+
+  // add-btn 이벤트 리스너 (변경: student dataset 제거)
   document.querySelectorAll('.add-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const student = btn.dataset.student;
+      // const student = btn.dataset.student; // 변경: 더 이상 필요 없음
       const category = btn.dataset.category;
-      addTask(student, category);
+      addTask(category); // 변경: student 매개변수 제거
     });
   });
 
+  // toggle-btn 이벤트 리스너 (변경: DOM 셀렉터 수정)
   document.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const targetId = btn.dataset.target;
+      const targetId = btn.dataset.target; // 예: completed-main
       const container = document.querySelector(`#${targetId} .task-list`);
       if (!container) return;
       const isHidden = container.style.display === 'none';
@@ -1376,9 +1396,9 @@
     });
   });
 
-  // 초기 로드
-  loadAllTasks('JH');
-  loadAllTasks('HJ');
+  // **변경: 초기 로드 로직 제거 (onAuthStateChanged에서 처리)**
+  // loadAllTasks('JH');
+  // loadAllTasks('HJ');
 </script>
 </body>
 </html>
