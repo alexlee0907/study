@@ -420,7 +420,6 @@
     <button class="dark-toggle-btn" id="darkToggleBtn">다크모드</button>
   </div>
 
-  <!-- JH 학생 섹션 -->
   <div class="student-section active" id="student-JH">
     <div class="category" id="숙제-JH">
       <h3><span>숙제</span> <button class="add-btn" data-student="JH" data-category="숙제">추가</button></h3>
@@ -462,7 +461,6 @@
     </div>
   </div>
 
-  <!-- HJ 학생 섹션 -->
   <div class="student-section" id="student-HJ">
     <div class="category" id="숙제-HJ">
       <h3><span>숙제</span> <button class="add-btn" data-student="HJ" data-category="숙제">추가</button></h3>
@@ -536,7 +534,7 @@
     });
   }
 
-  // 요청사항 전송 함수 (alert → customPopup)
+  // 요청사항 전송 함수
   window.sendRequest = async function(student) {
     const textarea = document.getElementById(`request-${student}`);
     const message = textarea.value.trim();
@@ -551,7 +549,7 @@
       const telegramMessage = `📝 **${student} 학생 요청사항**\n\n${message}\n\n📅 ${new Date().toLocaleString('ko-KR')}`;
       const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: TELEGRAM_CHAT_ID,
           text: telegramMessage,
@@ -573,7 +571,7 @@
     }
   };
 
-  // 커스텀 confirm 함수 (기존과 동일)
+  // 커스텀 confirm 함수
   function customConfirm(message) {
     return new Promise((resolve) => {
       const overlay = document.createElement('div');
@@ -629,7 +627,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // 카테고리별 입력 항목 정의 (주말보강 개선)
+  // 카테고리별 입력 항목 정의
   const categoryFields = {
     '숙제': [
       { label: '과목', type: 'select', options: ['영어', '수학', '과학'] },
@@ -715,12 +713,15 @@
     });
   });
 
-  function addTask(student, category) {
+  // addTask 함수: 새 항목 추가 및 수정 지원
+  function addTask(student, category, taskId = null, existingTaskData = {}, thisTaskDiv = null) {
+    const isEditMode = taskId !== null;
     const taskDiv = document.createElement('div');
     taskDiv.className = 'task';
-    const taskData = {};
+
     const inputs = [];
 
+    // 카테고리별 입력 필드 생성
     categoryFields[category].forEach(field => {
       const label = document.createElement('label');
       label.textContent = field.label + ": ";
@@ -733,18 +734,20 @@
           option.textContent = opt;
           input.appendChild(option);
         });
+        input.value = existingTaskData[field.label] || '';
       } else if (field.type === 'text') {
         input = document.createElement('input');
         input.type = 'text';
-        if (field.label === '과목') input.placeholder = '예: 수학';
-        if (field.label === '범위') input.placeholder = '예: 1~10쪽';
-        if (field.label === '내용') input.placeholder = '예: 과학 실험 보고서';
+        input.placeholder = field.label === '과목' ? '예: 수학' : (field.label === '범위' ? '예: 1~10쪽' : '예: 과학 실험 보고서');
+        input.value = existingTaskData[field.label] || '';
       } else if (field.type === 'date') {
         input = document.createElement('input');
         input.type = 'date';
+        input.value = existingTaskData[field.label] || '';
       } else if (field.type === 'time') {
         input = document.createElement('input');
         input.type = 'time';
+        input.value = existingTaskData[field.label] || '';
       }
       label.appendChild(input);
       taskDiv.appendChild(label);
@@ -754,19 +757,23 @@
     const btnArea = document.createElement('div');
     btnArea.className = 'btn-area';
     const saveBtn = document.createElement('button');
-    saveBtn.textContent = '입력';
+    saveBtn.textContent = isEditMode ? '수정' : '입력';
     saveBtn.onclick = async () => {
+      const newTaskData = {};
       inputs.forEach(({ label, input }) => {
-        taskData[label] = input.value;
+        newTaskData[label] = input.value;
       });
-      if (Object.values(taskData).some(val => !val)) {
+      if (Object.values(newTaskData).some(val => !val)) {
         customPopup('모든 항목을 입력해주세요.');
         return;
       }
-      const taskId = Date.now().toString();
+      const finalTaskId = taskId || Date.now().toString();
       try {
-        await saveTask(student, category, taskId, taskData);
-        taskDiv.remove();
+        await saveTask(student, category, finalTaskId, newTaskData);
+        taskDiv.remove(); // 입력/수정 폼 제거
+        if (isEditMode && thisTaskDiv) {
+          thisTaskDiv.remove(); // 기존 항목 제거 (renderTasks가 새로 그림)
+        }
       } catch (e) {
         customPopup('저장 실패');
         console.error(e);
@@ -774,18 +781,34 @@
     };
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = '취소';
-    cancelBtn.onclick = () => taskDiv.remove();
+    cancelBtn.onclick = () => {
+      taskDiv.remove(); // 입력/수정 폼 제거
+      if (isEditMode && thisTaskDiv) {
+        thisTaskDiv.style.display = ''; // 기존 항목 복원
+      }
+    };
     btnArea.appendChild(saveBtn);
     btnArea.appendChild(cancelBtn);
     taskDiv.appendChild(btnArea);
-    document.querySelector(`#${category}-${student} .task-list`).appendChild(taskDiv);
+
+    if (isEditMode && thisTaskDiv) {
+      // 수정 모드: 기존 항목 숨기고 편집 폼 삽입
+      thisTaskDiv.style.display = 'none';
+      thisTaskDiv.parentNode.insertBefore(taskDiv, thisTaskDiv.nextSibling);
+    } else {
+      // 추가 모드: 리스트 맨 위에 추가
+      document.querySelector(`#${category}-${student} .task-list`).prepend(taskDiv);
+    }
   }
 
   function getDeadlineClass(deadline) {
     if (!deadline) return '';
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const d = new Date(deadline);
-    if (d.toDateString() === today.toDateString()) return 'deadline-today';
+    d.setHours(0, 0, 0, 0);
+
+    if (d.getTime() === today.getTime()) return 'deadline-today';
     const diff = (d - today) / (1000 * 60 * 60 * 24);
     if (diff > 0 && diff <= 3) return 'deadline-soon';
     return '';
@@ -810,34 +833,48 @@
     let taskArray = Object.entries(tasks);
     if (['숙제', '공부', '시험'].includes(category)) {
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
       taskArray.sort((a, b) => {
-        const aDate = new Date(a[1]['마감일']);
-        const bDate = new Date(b[1]['마감일']);
-        const aValid = !isNaN(aDate);
-        const bValid = !isNaN(bDate);
+        const aDateStr = a[1]['마감일'];
+        const bDateStr = b[1]['마감일'];
+        const aDate = aDateStr ? new Date(aDateStr) : null;
+        const bDate = bDateStr ? new Date(bDateStr) : null;
+
+        if (aDate) aDate.setHours(0, 0, 0, 0);
+        if (bDate) bDate.setHours(0, 0, 0, 0);
+
+        const aValid = aDate && !isNaN(aDate.getTime());
+        const bValid = bDate && !isNaN(bDate.getTime());
+
         if (!aValid && !bValid) return 0;
         if (!aValid) return 1;
         if (!bValid) return -1;
-        if (aDate.toDateString() === today.toDateString() && bDate.toDateString() !== today.toDateString()) return -1;
-        if (aDate.toDateString() !== today.toDateString() && bDate.toDateString() === today.toDateString()) return 1;
+
+        if (aDate.getTime() === today.getTime() && bDate.getTime() !== today.getTime()) return -1;
+        if (aDate.getTime() !== today.getTime() && bDate.getTime() === today.getTime()) return 1;
+
         const aDiff = (aDate - today) / (1000 * 60 * 60 * 24);
         const bDiff = (bDate - today) / (1000 * 60 * 60 * 24);
         const aSoon = aDiff > 0 && aDiff <= 3;
         const bSoon = bDiff > 0 && bDiff <= 3;
+
         if (aSoon && !bSoon) return -1;
         if (!aSoon && bSoon) return 1;
-        return aDate - bDate;
+
+        return aDate.getTime() - bDate.getTime();
       });
     }
 
     taskArray.forEach(([taskId, taskData]) => {
       const taskDiv = document.createElement('div');
+      taskDiv.classList.add('task');
+      taskDiv.dataset.taskId = taskId;
+
       let deadlineClass = '';
       if (['숙제', '공부', '시험'].includes(category)) {
         deadlineClass = getDeadlineClass(taskData['마감일']);
       }
       if (deadlineClass) taskDiv.classList.add(deadlineClass);
-      taskDiv.classList.add('task');
 
       const summarySpan = document.createElement('span');
       if (category === '주말보강') {
@@ -870,6 +907,13 @@
         };
         btnArea.appendChild(restoreBtn);
       } else {
+        const editBtn = document.createElement('button');
+        editBtn.textContent = '수정';
+        editBtn.onclick = () => {
+          addTask(student, category, taskId, taskData, taskDiv);
+        };
+        btnArea.appendChild(editBtn);
+
         const completeBtn = document.createElement('button');
         completeBtn.textContent = '완료';
         completeBtn.onclick = async () => {
